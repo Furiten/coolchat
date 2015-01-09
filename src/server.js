@@ -1,0 +1,32 @@
+/**
+ * Server-side entry point
+ */
+
+var _ = require('lodash');
+var app = require('express')();
+var http = require('http').Server(app);
+var path = require('path');
+var io = require('socket.io')(http);
+
+var servedFiles = {
+    '/': 'index.html',
+    '/bundle.js': 'bundle.js',
+    '/styles.css': 'styles.css'
+};
+
+_.each(servedFiles, function(value, key) {
+    app.get(key, function(req, res) {
+        res.sendFile(path.resolve(__dirname + '/../build/' + value));
+    });
+});
+
+http.listen(3000, function(){
+    console.log('listening on *:3000');
+});
+
+io.on('connection', function(socket){
+    console.log('a user connected');
+    socket.on('disconnect', function(){
+        console.log('user disconnected');
+    });
+});

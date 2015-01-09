@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-js": "browserify index.js > bundle.js -vd",
-    "watch-js": "watchify index.js -o bundle.js -vd"
+    "build-js": "browserify src/client.js > build/bundle.js -vd",
+    "watch-js": "watchify src/client.js -o build/bundle.js -vd"
   },
   "repository": {
     "type": "git",
