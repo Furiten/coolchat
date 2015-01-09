@@ -1,0 +1,26 @@
+{
+  "name": "coolchat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build-js": "browserify index.js > bundle.js -vd",
+    "watch-js": "watchify index.js -o bundle.js -vd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heilage-nsk/coolchat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/heilage-nsk/coolchat/issues"
+  },
+  "homepage": "https://github.com/heilage-nsk/coolchat",
+  "dependencies": {
+    "express": "^4.10.7",
+    "jquery": "^2.1.3",
+    "lodash": "^2.4.1",
+    "socket.io": "^1.2.1"
+  }
+}
