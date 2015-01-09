@@ -8,6 +8,8 @@ var http = require('http').Server(app);
 var path = require('path');
 var io = require('socket.io')(http);
 
+var controller = require('./server/controller')(io);
+
 var servedFiles = {
     '/': 'index.html',
     '/bundle.js': 'bundle.js',
@@ -20,13 +22,8 @@ _.each(servedFiles, function(value, key) {
     });
 });
 
-http.listen(3000, function(){
+http.listen(3000, function() {
     console.log('listening on *:3000');
 });
 
-io.on('connection', function(socket){
-    console.log('a user connected');
-    socket.on('disconnect', function(){
-        console.log('user disconnected');
-    });
-});
+io.on('connection', controller.addSocket);
