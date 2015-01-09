@@ -5,6 +5,7 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var dateFormat = require('./common/dateformat');
+var io = require('socket.io-client');
 
 var socket, button, msgField, chatField;
 

@@ -13,6 +13,7 @@ var controller = require('./server/controller')(io);
 var servedFiles = {
     '/': 'index.html',
     '/bundle.js': 'bundle.js',
+    '/build/bundle.map.json': 'bundle.map.json', // debug only!
     '/styles.css': 'styles.css'
 };
 
