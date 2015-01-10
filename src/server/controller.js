@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var log = require('./log');
+var html = require('../common/html.js');
 var io;
 
 var onlineUsers = {};
@@ -36,10 +37,12 @@ var controller = {
 
     'onDisconnect': function(socket) {
         if (onlineUsers[socket.conn.id] !== undefined) {
-            sendMessage('chat__userDisconnected', {
-                nickname: onlineUsers[socket.conn.id]
-            });
-            log('User ' + onlineUsers[socket.conn.id] + ' disconnected');
+            if (onlineUsers[socket.conn.id]) {
+                sendMessage('chat__userDisconnected', {
+                    nickname: onlineUsers[socket.conn.id]
+                });
+                log('User ' + onlineUsers[socket.conn.id] + ' disconnected');
+            }
             delete onlineUsers[socket.conn.id];
         }
     },
@@ -54,6 +57,7 @@ var controller = {
     },
 
     'onChatMessage': function(socket, message) {
+        message = html.strip(message);
         log('User ' + onlineUsers[socket.conn.id] + ' sent message: ' + message);
         sendMessage('chat__message', {
             nickname: onlineUsers[socket.conn.id],

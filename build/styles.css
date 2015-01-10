@@ -1,0 +1,16 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+/* Text enter field & button */
+.controls {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #aaa;
+}
+
+.controls .field_message {
+    width: 100%;
+}

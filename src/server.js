@@ -14,7 +14,10 @@ var servedFiles = {
     '/': 'index.html',
     '/bundle.js': 'bundle.js',
     '/build/bundle.map.json': 'bundle.map.json', // debug only!
-    '/styles.css': 'styles.css'
+    '/styles.css': 'styles.css',
+    '/emoji.css': 'emoji.css',
+    '/emoji.png': 'emoji.png',
+    '/message.mp3': 'message.mp3'
 };
 
 _.each(servedFiles, function(value, key) {
