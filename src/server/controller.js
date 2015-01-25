@@ -4,6 +4,7 @@ var html = require('../common/html.js');
 var io;
 
 var onlineUsers = {};
+var vkUsers = {};
 var lastMessages = [];
 var MAX_LAST_MSGS = 10;
 
@@ -31,8 +32,13 @@ function sendMessage(eventType, data, excludeSelfSocket) {
 
 var controller = {
     'onConnect': function(socket) {
-        onlineUsers[socket.conn.id] = null; // no username yet
-        log('User #' + socket.conn.id + ' connected');
+        var profile = socket.conn.request.user;
+        onlineUsers[socket.conn.id] = profile.displayName;
+        sendMessage('chat__userCame', {
+            nickname: profile.displayName
+        }, socket);
+        socket.emit('chat__previousMessages', lastMessages);
+        log('User #' + socket.conn.id + ' connected (' + profile.displayName + ')');
     },
 
     'onDisconnect': function(socket) {
@@ -45,15 +51,6 @@ var controller = {
             }
             delete onlineUsers[socket.conn.id];
         }
-    },
-
-    'onNicknameFound': function(socket, nickname) {
-        onlineUsers[socket.conn.id] = nickname; // got username
-        sendMessage('chat__userCame', {
-            nickname: nickname
-        }, socket);
-        socket.emit('chat__previousMessages', lastMessages);
-        log('User #' + socket.conn.id + ' sent nickname: ' + nickname);
     },
 
     'onChatMessage': function(socket, message) {
@@ -72,8 +69,17 @@ module.exports = function(_io) {
         addSocket: function(socket) {
             controller.onConnect(socket);
             socket.on('disconnect', _.partial(controller.onDisconnect, socket));
-            socket.on('chat__nickname', _.partial(controller.onNicknameFound, socket));
             socket.on('chat__message', _.partial(controller.onChatMessage, socket));
+        },
+        registerUser: function(accessToken, profile, onReady) {
+            // onReady(null, user); -> ok
+            // onReady(null, false); -> incorrect password?
+            // onReady(err); -> exception occured
+            vkUsers[profile.id] = profile;
+            onReady(null, profile);
+        },
+        getUser: function(userId) {
+            return vkUsers[userId] || false;
         }
     };
 };

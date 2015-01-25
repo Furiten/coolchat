@@ -18,10 +18,6 @@ var socket,
     sound,
     soundEnabled = false;
 
-function login() {
-    socket.emit('chat__nickname', 'heilage');
-}
-
 function updateTitle(messagesCount) {
     var title = $('title');
     if (messagesCount) {
@@ -117,10 +113,8 @@ $(function() {
     sound = document.getElementById('chat_messageSound');
     $('#chat_messageSound').attr('src', 'message.mp3');
 
-    login();
     msgField.on('keydown', processTextInput);
 
-    socket.io.on('reconnect', login);
     socket.on('chat__userCame', userLoggedIn);
     socket.on('chat__message', userMessage);
     socket.on('chat__userDisconnected', userWentAway);
