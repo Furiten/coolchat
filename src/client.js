@@ -4,6 +4,7 @@
 
 var _ = require('lodash');
 var $ = require('jquery');
+window.$ = window.jQuery = $;
 var dateFormat = require('./common/dateformat');
 var html = require('./common/html');
 var io = require('socket.io-client');
@@ -17,6 +18,14 @@ var socket,
     unreadInterval = null,
     sound,
     soundEnabled = false;
+
+function showMessage(content, date, msgtype) {
+    var date = '<div class="right floated ui horizontal label">' + dateFormat.pattern(date, 'Y-m-d H:i:s') + '</div></div>';
+    chatField.append("<div class='chat_message ui segment'>" +
+        msgPrefilters(content) +
+        date +
+    "</div>");
+}
 
 function updateTitle(messagesCount) {
     var title = $('title');
@@ -54,13 +63,13 @@ function msgPrefilters(msg) {
 }
 
 function userLoggedIn(data) {
-    var content = dateFormat.format(new Date()) + ' К нам приходит ' + data.nickname + '!';
-    chatField.append("<div class='message'>" + msgPrefilters(content) + "</div>");
+    var content = ' К нам приходит ' + data.nickname + '!';
+    showMessage(content, new Date());
 }
 
 function userMessage(data) {
-    var content = dateFormat.format(new Date()) + ' <b>' + data.nickname + '</b>: ' + data.message;
-    chatField.append("<div class='message'>" + msgPrefilters(content) + "</div>");
+    var content = ' <b>' + data.nickname + '</b>: ' + data.message;
+    showMessage(content, new Date());
     if (soundEnabled) {
         sound.play();
     }
@@ -70,8 +79,8 @@ function userMessage(data) {
 }
 
 function userWentAway(data) {
-    var content = dateFormat.format(new Date()) + ' От нас уходит ' + data.nickname + '.';
-    chatField.append("<div class='message'>" + msgPrefilters(content) + "</div>");
+    var content = ' От нас уходит ' + data.nickname + '.';
+    showMessage(content, new Date());
 }
 
 function showPrevMessages(messagesList) {
@@ -81,19 +90,19 @@ function showPrevMessages(messagesList) {
         var date = new Date(msg.date);
         switch(msg.event) {
             case 'chat__message':
-                content = dateFormat.format(date) + ' <b>' + msg.nickname + '</b>: ' + msg.message;
+                content = ' <b>' + msg.nickname + '</b>: ' + msg.message;
                 break;
             case 'chat__userDisconnected':
-                content = dateFormat.format(date) + ' От нас уходит ' + msg.nickname + '.';
+                content = ' От нас уходит ' + msg.nickname + '.';
                 break;
             case 'chat__userCame':
-                content = dateFormat.format(date) + ' К нам приходит ' + msg.nickname + '!';
+                content = ' К нам приходит ' + msg.nickname + '!';
                 break;
             default:
                 return;
         }
 
-        chatField.prepend("<div class='message'>" + msgPrefilters(content) + "</div>");
+        showMessage(content, date);
     })
 }
 
@@ -106,7 +115,6 @@ function processTextInput(event) {
 }
 
 $(function() {
-    window.jq = $;
     socket = io();
     msgField = $('.field_message');
     chatField = $('.field_chat');
@@ -131,7 +139,7 @@ $(function() {
     $(window).blur(function() {
         soundEnabled = true;
         unreadEnabled = true;
-        chatField.find('.message').css('border-bottom', '0px');
-        chatField.find('.message').last().css('border-bottom', '1px solid #333');
+        chatField.find('.chat_message').css('border-bottom', '0px');
+        chatField.find('.chat_message').last().css('border-bottom', '1px solid #333');
     });
 });

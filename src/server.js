@@ -31,6 +31,10 @@ _.each(servedFiles, function(value, key) {
     });
 });
 
+app.get('/lib*', function(req, res) {
+    res.sendFile(path.resolve(__dirname + '/../build' + req.url));
+});
+
 // Passport-vkontakte authentication entry point
 app.get('/',
     passport.authenticate('vkontakte'),
