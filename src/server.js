@@ -15,14 +15,10 @@ var passport = require('./server/passport-utils')(controller);
 require('./server/express-middlewares')(app, io, passport);
 
 var servedFiles = {
-    '/chat/': 'index.html',
-    '/failedToEnter/': 'failed.html',
+    '/chat/': 'static/index.html',
+    '/failedToEnter/': 'static/failed.html',
     '/bundle.js': 'bundle.js',
-    '/build/bundle.map.json': 'bundle.map.json', // debug only!
-    '/styles.css': 'styles.css',
-    '/emoji.css': 'emoji.css',
-    '/emoji.png': 'emoji.png',
-    '/message.mp3': 'message.mp3'
+    '/bundle.js.map': 'bundle.js.map' // debug only!
 };
 
 _.each(servedFiles, function(value, key) {
@@ -31,7 +27,7 @@ _.each(servedFiles, function(value, key) {
     });
 });
 
-app.get('/lib*', function(req, res) {
+app.get('/static*', function(req, res) {
     res.sendFile(path.resolve(__dirname + '/../build' + req.url));
 });
 
