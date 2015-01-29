@@ -3,6 +3,7 @@
  */
 
 var _ = require('lodash');
+var hb = require('handlebars');
 var $ = require('jquery');
 window.$ = window.jQuery = $;
 var dateFormat = require('./common/dateformat');
@@ -17,14 +18,19 @@ var socket,
     unreadMessagesCount = 0,
     unreadInterval = null,
     sound,
+    msgTemplate,
     soundEnabled = false;
 
-function showMessage(content, date, msgtype) {
-    var date = '<div class="right floated ui horizontal label">' + dateFormat.pattern(date, 'Y-m-d H:i:s') + '</div></div>';
-    chatField.append("<div class='chat_message ui segment'>" +
-        msgPrefilters(content) +
-        date +
-    "</div>");
+function showMessage(msg) {
+    chatField.append(msgTemplate({
+        userMessage: msg.type == 'userMessage',
+        userCame: msg.type == 'userCame',
+        userWentAway: msg.type == 'userWentAway',
+        dateTime: dateFormat.pattern(msg.date, 'Y-m-d @ H:i:s'),
+        username: msg.username,
+        avatar: msg.avatar,
+        content: msg.content ? msgPrefilters(msg.content) : null
+    }));
 }
 
 function updateTitle(messagesCount) {
@@ -63,13 +69,23 @@ function msgPrefilters(msg) {
 }
 
 function userLoggedIn(data) {
-    var content = ' К нам приходит ' + data.nickname + '!';
-    showMessage(content, new Date());
+    showMessage({
+        username: data.nickname,
+        avatar: data.avatar,
+        date: data.date ? new Date(data.date) : new Date(),
+        type: 'userCame'
+    });
 }
 
 function userMessage(data) {
-    var content = ' <b>' + data.nickname + '</b>: ' + data.message;
-    showMessage(content, new Date());
+    showMessage({
+        content: data.message,
+        username: data.nickname,
+        avatar: data.avatar,
+        date: data.date ? new Date(data.date) : new Date(),
+        type: 'userMessage'
+    });
+
     if (soundEnabled) {
         sound.play();
     }
@@ -79,30 +95,28 @@ function userMessage(data) {
 }
 
 function userWentAway(data) {
-    var content = ' От нас уходит ' + data.nickname + '.';
-    showMessage(content, new Date());
+    showMessage({
+        username: data.nickname,
+        avatar: data.avatar,
+        date: data.date ? new Date(data.date) : new Date(),
+        type: 'userWentAway'
+    });
 }
 
 function showPrevMessages(messagesList) {
-    messagesList.reverse();
     _.each(messagesList, function(msg) {
-        var content;
-        var date = new Date(msg.date);
         switch(msg.event) {
             case 'chat__message':
-                content = ' <b>' + msg.nickname + '</b>: ' + msg.message;
+                userMessage(msg);
                 break;
             case 'chat__userDisconnected':
-                content = ' От нас уходит ' + msg.nickname + '.';
+                userWentAway(msg);
                 break;
             case 'chat__userCame':
-                content = ' К нам приходит ' + msg.nickname + '!';
+                userLoggedIn(msg);
                 break;
             default:
-                return;
         }
-
-        showMessage(content, date);
     })
 }
 
@@ -142,4 +156,6 @@ $(function() {
         chatField.find('.chat_message').css('border-bottom', '0px');
         chatField.find('.chat_message').last().css('border-bottom', '1px solid #333');
     });
+
+    msgTemplate = hb.compile($('#message-tpl').html());
 });

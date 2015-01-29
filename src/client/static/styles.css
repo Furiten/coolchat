@@ -24,5 +24,20 @@
 }
 
 .chat_message .right.floated {
-    float: right;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.message_username {
+    font-weight: bold;
+}
+
+.message_username, .message_content {
+    margin-left: 50px;
+}
+
+.message_avatar {
+    margin-top: 5px;
+    float: left;
 }

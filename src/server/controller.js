@@ -17,7 +17,8 @@ function addMessageToLast(eventType, data) {
         date: new Date(),
         event: eventType,
         nickname: data.nickname,
-        message: data.message
+        message: data.message,
+        avatar: data.avatar
     });
 }
 
@@ -30,10 +31,17 @@ function sendMessage(eventType, data, excludeSelfSocket) {
     }
 }
 
+function getAvatar(profile) {
+    if (!profile.photos) return null;
+    if (!profile.photos.length) return null;
+    if (!profile.photos[0].value) return null;
+    return profile.photos[0].value;
+}
+
 var controller = {
     'onConnect': function(socket) {
         var profile = socket.conn.request.user;
-        onlineUsers[socket.conn.id] = profile.displayName;
+        onlineUsers[socket.conn.id] = profile;
         sendMessage('chat__userCame', {
             nickname: profile.displayName
         }, socket);
@@ -45,9 +53,9 @@ var controller = {
         if (onlineUsers[socket.conn.id] !== undefined) {
             if (onlineUsers[socket.conn.id]) {
                 sendMessage('chat__userDisconnected', {
-                    nickname: onlineUsers[socket.conn.id]
+                    nickname: onlineUsers[socket.conn.id].displayName
                 });
-                log('User ' + onlineUsers[socket.conn.id] + ' disconnected');
+                log('User ' + onlineUsers[socket.conn.id].displayName + ' disconnected');
             }
             delete onlineUsers[socket.conn.id];
         }
@@ -55,9 +63,10 @@ var controller = {
 
     'onChatMessage': function(socket, message) {
         message = html.strip(message);
-        log('User ' + onlineUsers[socket.conn.id] + ' sent message: ' + message);
+        log('User ' + onlineUsers[socket.conn.id].displayName + ' sent message: ' + message);
         sendMessage('chat__message', {
-            nickname: onlineUsers[socket.conn.id],
+            nickname: onlineUsers[socket.conn.id].displayName,
+            avatar: getAvatar(onlineUsers[socket.conn.id]),
             message: message
         });
     }

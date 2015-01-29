@@ -7,6 +7,31 @@
     <script src="/static/semantic-ui/semantic.min.js" type="text/javascript"></script>
     <link rel="stylesheet" href="/static/semantic-ui/semantic.min.css" />
     <link rel="stylesheet" href="/static/styles.css" />
+    <script type="text/x-handlebars-template" id="message-tpl">
+        {{#if userMessage}}
+        <div class='chat_message ui segment'>
+            {{#if avatar}}
+                <div class="message_avatar"><img class="ui avatar image" src="{{avatar}}" alt="" /></div>
+            {{/if}}
+            <div class="message_username">{{username}}</div>
+            <div class="message_content">{{content}}</div>
+            <div class="right floated ui horizontal label">{{dateTime}}</div>
+        </div>
+        {{else}}
+            {{#if userCame}}
+                <div class='chat_message ui segment'>
+                    К нам приходит {{username}}!
+                    <div class="right floated ui horizontal label">{{dateTime}}</div>
+                </div>
+            {{/if}}
+            {{#if userWentAway}}
+                <div class='chat_message ui segment'>
+                    От нас уходит {{username}}.
+                    <div class="right floated ui horizontal label">{{dateTime}}</div>
+                </div>
+            {{/if}}
+        {{/if}}
+    </script>
 </head>
 <body>
 <div class="field_chat"></div>
