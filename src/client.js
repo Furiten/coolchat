@@ -31,6 +31,8 @@ function showMessage(msg) {
         avatar: msg.avatar,
         content: msg.content ? msgPrefilters(msg.content) : null
     }));
+
+    window.scrollTo(0, document.body.scrollHeight + 70);
 }
 
 function updateTitle(messagesCount) {

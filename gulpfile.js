@@ -12,20 +12,51 @@ var watchify = require('watchify');
 var del = require('del');
 var server = require('gulp-express');
 
-var bundler = watchify(browserify('./src/client.js', watchify.args));
-function bundle() {
-    return bundler.bundle()
-        .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-        .pipe(source('bundle.js'))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-//        .pipe(uglify())
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('./build/'));
+var sourceFile = './src/client.js';
+var destFile = 'bundle.js';
+var destFolder = './build/';
+
+function handleErrors(msg) {
+    console.log(msg);
 }
 
-gulp.task('build-js', bundle);
-bundler.on('update', bundle);
+gulp.task('build-js', function() {
+    var bundler = browserify({
+        entries: ['./src/client.js']
+    });
+
+    var bundle = function() {
+        return bundler.bundle()
+            .on('error', handleErrors)
+            .pipe(source(destFile))
+            .pipe(gulp.dest(destFolder));
+    };
+
+    return bundle();
+});
+
+gulp.task('watch-js', function() {
+    var bundler = browserify({
+        // Required watchify args
+        cache: {}, packageCache: {}, fullPaths: true,
+        // Browserify Options
+        entries: ['./src/client.js'],
+        debug: true
+    });
+
+    var bundle = function() {
+        return bundler
+            .bundle()
+            .on('error', handleErrors)
+            .pipe(source(destFile))
+            .pipe(gulp.dest(destFolder));
+    };
+
+    bundler = watchify(bundler);
+    bundler.on('update', bundle);
+
+    return bundle();
+});
 
 gulp.task('watch-static', ['move-static'], function() {
     watch('./src/client/static/**/*', {base: './src/client/static/'})
@@ -54,4 +85,4 @@ gulp.task('clean', function(cb) {
     ]);
 });
 
-gulp.task('default', ['build-js', 'server', 'watch-static']);
+gulp.task('default', ['watch-js', 'server', 'watch-static']);
