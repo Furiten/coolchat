@@ -39,6 +39,10 @@ function getAvatar(profile) {
 }
 
 var controller = {
+    'onPing': function(socket) {
+        socket.emit('pong');
+    },
+
     'onConnect': function(socket) {
         var profile = socket.conn.request.user;
         onlineUsers[socket.conn.id] = profile;
@@ -76,9 +80,11 @@ module.exports = function(_io) {
     io = _io;
     return {
         addSocket: function(socket) {
+            console.log('----------');
             controller.onConnect(socket);
             socket.on('disconnect', _.partial(controller.onDisconnect, socket));
             socket.on('chat__message', _.partial(controller.onChatMessage, socket));
+            socket.on('ping', _.partial(controller.onPing, socket));
         },
         registerUser: function(accessToken, profile, onReady) {
             // onReady(null, user); -> ok

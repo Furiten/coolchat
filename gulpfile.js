@@ -2,7 +2,6 @@
 
 var browserify = require('browserify');
 var gulp = require('gulp');
-var gutil = require('gulp-util');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
@@ -22,13 +21,17 @@ function handleErrors(msg) {
 
 gulp.task('build-js', function() {
     var bundler = browserify({
-        entries: ['./src/client.js']
+        entries: [sourceFile]
     });
 
     var bundle = function() {
         return bundler.bundle()
             .on('error', handleErrors)
             .pipe(source(destFile))
+            .pipe(buffer())
+            .pipe(sourcemaps.init())
+            .pipe(uglify())
+            .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest(destFolder));
     };
 
@@ -40,7 +43,7 @@ gulp.task('watch-js', function() {
         // Required watchify args
         cache: {}, packageCache: {}, fullPaths: true,
         // Browserify Options
-        entries: ['./src/client.js'],
+        entries: [sourceFile],
         debug: true
     });
 
@@ -86,3 +89,4 @@ gulp.task('clean', function(cb) {
 });
 
 gulp.task('default', ['watch-js', 'server', 'watch-static']);
+gulp.task('release', ['build-js', 'move-static']);

@@ -7,9 +7,18 @@ var hb = require('handlebars');
 var $ = require('jquery');
 window.$ = window.jQuery = $;
 var dateFormat = require('./common/dateformat');
+var versions = require('./common/version-config');
 var html = require('./common/html');
 var io = require('socket.io-client');
 var emoji = require('emoji');
+
+function cleanLocation() {
+    var loc = window.location.href;
+    if (loc.indexOf(versions.authCookieName) != -1) {
+        var newLoc = loc.replace(new RegExp('\\?' + versions.authCookieName + '=([^&]+)'), '');
+        window.history.replaceState({}, undefined, newLoc);
+    }
+}
 
 var socket,
     msgField,
@@ -130,7 +139,23 @@ function processTextInput(event) {
     }
 }
 
+function onReloadPageClicked(e) {
+    e.preventDefault();
+    document.cookie = versions.authCookieName + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    window.location.reload();
+}
+
+function showPreloader() {
+    $('.loader_overlay').show();
+}
+
+function hidePreloader() {
+    $('.loader_overlay').hide();
+}
+
 $(function() {
+    cleanLocation();
+
     socket = io();
     msgField = $('.field_message');
     chatField = $('.field_chat');
@@ -143,6 +168,12 @@ $(function() {
     socket.on('chat__message', userMessage);
     socket.on('chat__userDisconnected', userWentAway);
     socket.on('chat__previousMessages', showPrevMessages);
+
+    socket.on('disconnect', showPreloader);
+    socket.on('reconnect', function() {
+        socket.emit('ping');
+    });
+    socket.on('pong', hidePreloader);
 
     msgField.trigger('focus');
 
@@ -158,6 +189,8 @@ $(function() {
         chatField.find('.chat_message').css('border-bottom', '0px');
         chatField.find('.chat_message').last().css('border-bottom', '1px solid #333');
     });
+
+    $('.reload_page').on('click', onReloadPageClicked);
 
     msgTemplate = hb.compile($('#message-tpl').html());
 });
