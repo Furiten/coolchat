@@ -73,6 +73,14 @@ var controller = {
             avatar: getAvatar(onlineUsers[socket.conn.id]),
             message: message
         });
+    },
+
+    'onTyping': function(socket) {
+        socket.broadcast.emit('chat__typing', onlineUsers[socket.conn.id].displayName);
+    },
+
+    'onTypingEnd': function(socket) {
+        socket.broadcast.emit('chat__stoppedTyping', onlineUsers[socket.conn.id].displayName);
     }
 };
 
@@ -85,6 +93,8 @@ module.exports = function(_io) {
             socket.on('disconnect', _.partial(controller.onDisconnect, socket));
             socket.on('chat__message', _.partial(controller.onChatMessage, socket));
             socket.on('ping', _.partial(controller.onPing, socket));
+            socket.on('chat__userTyping', _.partial(controller.onTyping, socket));
+            socket.on('chat__userStoppedTyping', _.partial(controller.onTypingEnd, socket));
         },
         registerUser: function(accessToken, profile, onReady) {
             // onReady(null, user); -> ok

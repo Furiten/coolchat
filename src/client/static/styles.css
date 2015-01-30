@@ -33,9 +33,18 @@
 
 .controls > .segment {
     padding: 0;
+    margin: 0;
     box-shadow: none !important;
-    border-top: 3px solid #ccc;
+    border-top: 1px solid #ccc;
 }
+
+.controls .now_typing {
+    height: 21px;
+    padding-left: 28px;
+    border-top: 3px solid #ccc;
+    color: #bbb;
+}
+
 
 .chat_message {
     margin: 5px 5px !important;

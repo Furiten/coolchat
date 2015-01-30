@@ -32,12 +32,16 @@
             {{/if}}
         {{/if}}
     </script>
+    <script type="text/x-handlebars-template" id="typing-tpl">
+        {{list}} {{plural count "набирает сообщение" "набирают сообщение" "набирают сообщение"}}
+    </script>
 </head>
 <body>
 <div class="full height">
     <div class="main container">
         <div class="field_chat"></div>
         <div class="controls">
+            <div class="ui raised segment now_typing">lorem ipsum </div>
             <div class="ui raised segment">
                 <textarea class="field_message"></textarea>
             </div>
