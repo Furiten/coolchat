@@ -51,7 +51,7 @@ function userMessage(data) {
         type: 'userMessage'
     });
 
-    unread.onNewMessage();
+    unread.onNewMessage(data);
 }
 
 function userWentAway(data) {

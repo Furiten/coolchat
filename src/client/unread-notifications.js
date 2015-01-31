@@ -2,12 +2,14 @@ var unreadEnabled = false;
 var unreadMessagesCount = 0;
 var sound = require('./sound');
 var windowTitle = require('./window-title');
+var notifications = require('./notifications');
 
 module.exports = {
-    onNewMessage: function() {
+    onNewMessage: function(message) {
         if (unreadEnabled) {
             sound.play();
             windowTitle.update(++unreadMessagesCount);
+            notifications.notify(message.nickname, message.avatar, message.message);
         }
     },
     enable: function() {
