@@ -36,6 +36,7 @@
     "gulp-watch": "^4.1.0",
     "handlebars": "^2.0.0",
     "passport": "^0.2.1",
+    "passport-google-oauth": "^0.1.5",
     "passport-vkontakte": "^0.3.0",
     "passport.socketio": "^3.4.1",
     "redis": "^0.12.1",

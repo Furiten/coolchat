@@ -31,16 +31,9 @@ app.get('/static*', function(req, res) {
     res.sendFile(path.resolve(__dirname + '/../build' + req.url));
 });
 
-// Passport-vkontakte authentication entry point
-app.get('/auth/vkontakte',
-    passport.authenticate('vkontakte', { failureRedirect: '/failedToEnter/' }),
-    function(req, res){
-        // The request will be redirected to vk.com for authentication, so
-        // this function will not be called.
-    }
-);
+app.get('/auth/vkontakte', passport.authenticate('vkontakte', { failureRedirect: '/failedToEnter/' }));
+app.get('/auth/google', passport.authenticate('google', {scope: 'https://www.googleapis.com/auth/plus.login'}));
 
-// Passport-vkontakte callback
 app.get('/auth/vkontakte/callback',
     passport.authenticate('vkontakte', { failureRedirect: '/failedToEnter/' }),
     function(req, res) {
@@ -48,9 +41,15 @@ app.get('/auth/vkontakte/callback',
     }
 );
 
+app.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/failedToEnter/' }),
+    function(req, res) {
+        res.redirect('/?' + versions.authCookieName + '=' + versions.authCookieHash);
+    });
+
 app.get('/', function(req, res) {
     if (req.cookies[versions.authCookieName] != versions.authCookieHash && req.query[versions.authCookieName] != versions.authCookieHash) {
-        res.redirect('/auth/vkontakte');
+        res.sendFile(path.resolve(__dirname + '/../build/static/select_auth_provider.html'));
     } else {
         res.cookie(versions.authCookieName, versions.authCookieHash);
         res.sendFile(path.resolve(__dirname + '/../build/static/index.html'));

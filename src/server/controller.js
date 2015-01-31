@@ -32,10 +32,15 @@ function sendMessage(eventType, data, excludeSelfSocket) {
 }
 
 function getAvatar(profile) {
-    if (!profile.photos) return null;
-    if (!profile.photos.length) return null;
-    if (!profile.photos[0].value) return null;
-    return profile.photos[0].value;
+    if (profile._json && profile._json.picture) {
+        return profile._json.picture;
+    }
+
+    if (profile.photos && profile.photos.length && profile.photos[0].value) {
+        return profile.photos[0].value;
+    }
+
+    return null;
 }
 
 var controller = {
