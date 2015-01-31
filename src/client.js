@@ -10,6 +10,7 @@ var messages = require('./client/messages');
 var versions = require('./common/version-config');
 var io = require('socket.io-client');
 var unread = require('./client/unread-notifications');
+var userlist = require('./client/userlist');
 
 function cleanLocation() {
     var loc = window.location.href;
@@ -60,9 +61,15 @@ $(function() {
 
     msgField.on('keydown', processTextInput);
 
-    socket.on('chat__userCame', messages.userLoggedIn);
+    socket.on('chat__userCame', function(data) {
+        userlist.add(data.nickname /* TODO: заменить на норм айди */, data.nickname, data.avatar, data.link);
+        messages.userLoggedIn(data);
+    });
     socket.on('chat__message', messages.userMessage);
-    socket.on('chat__userDisconnected', messages.userWentAway);
+    socket.on('chat__userDisconnected', function(data) {
+        messages.userWentAway(data);
+        userlist.remove(data.nickname /* TODO: заменить на норм айди */);
+    });
     socket.on('chat__previousMessages', messages.showPrevMessages);
     socket.on('chat__typing', typing.add);
     socket.on('chat__stoppedTyping', typing.remove);

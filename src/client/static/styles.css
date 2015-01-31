@@ -3,24 +3,27 @@
 }
 
 .main.container {
+    margin: 0 auto;
+    height: 100%;
+}
+
+.mainchat {
     background-color: #FFFFFF;
-    margin: 0em auto;
-    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.05);
     border-left: 1px solid #DDDDDD;
     border-right: 1px solid #DDDDDD;
     border-bottom: 1px solid #DDDDDD;
     padding: 2em 2em 7em;
-    z-index: 1;
     min-height: 100%;
 }
 
 .controls {
     position: fixed;
-    bottom: 0px;
-    margin: 0em auto;
+    bottom: 0;
+    margin: 0 auto;
     border-left: 0;
     border-right: 0;
-    margin-left: -28px;
+    margin-left: -2em;
 }
 
 .controls textarea {
@@ -28,7 +31,7 @@
     outline: none;
     resize: none;
     width: 100%;
-    height: 70px;
+    height: 5em;
 }
 
 .controls > .segment {
@@ -39,17 +42,17 @@
 }
 
 .controls .now_typing {
-    height: 21px;
-    padding-left: 28px;
+    height: 1.6em;
+    padding-left: 2em;
     border-top: 3px solid #ccc;
     color: #bbb;
 }
 
 
-.chat_message {
-    margin: 5px 5px !important;
-    padding: 4px 0 4px 1em !important;
-    line-height: 22px;
+.ui.segment.chat_message {
+    margin: 0.3em 0.3em;
+    padding: 0.25em 0 0.25em 1em;
+    line-height: 1.5em;
 }
 
 .chat_message .right.floated {
@@ -63,11 +66,11 @@
 }
 
 .message_username, .message_content {
-    margin-left: 50px;
+    margin-left: 3.5em;
 }
 
 .message_avatar {
-    margin-top: 5px;
+    margin-top: 0.2em;
     float: left;
 }
 
@@ -86,8 +89,8 @@
     position: absolute;
     top: 60%;
     left: 50%;
-    margin-left: -200px;
-    width: 400px;
+    margin-left: -14.25em;
+    width: 28.5em;
     text-align: center;
 }
 
@@ -101,25 +104,90 @@
 
 .auth-select > .divider {
     margin: 10px auto;
-    width: 400px;
+    width: 28.5em
+}
+
+.userlist {
+    /*width: 40px;*/
+    /*height: 600px;*/
+    overflow: scroll;
+}
+
+.userlist .user-item {
+    /*margin-bottom: 3px;*/
+}
+
+.buttons_container {
+    position: fixed;
+    top: 0;
+    margin-left: -2em;
+    text-align: right;
+}
+
+.buttons_set {
+    display: inline-block;
+    margin-top: 0.7em;
+}
+
+.buttons_set .icon {
+    font-size: 1.4em;
+}
+
+.buttons_set .ui.icon.button {
+    padding: 0.5em;
+}
+
+.buttons_set .ui.floating.label {
+    top: auto;
+    left: auto;
 }
 
 @media only screen and (min-width: 800px) {
-    .main.container {
-        width: 800px;
+    .main.container, .buttons_container {
+        width: 57.1em;
+    }
+
+    .mainchat {
+        margin-right: 4.3em;
     }
 
     .controls {
-        width: 798px;
+        width: 52.7em;
+    }
+
+    .buttons_set .ui.icon.button {
+        margin-left: -1em;
+    }
+
+    .buttons_set .ui.floating.label {
+        margin-left: -1.7em !important;
+        margin-top: -1.5em !important;
     }
 }
 
 @media only screen and (max-width: 799px) {
-    .main.container {
-        width: 500px;
+    .main.container, .buttons_container {
+        width: 35.7em;
+    }
+
+    .mainchat {
+        margin-right: 3.6em;
     }
 
     .controls {
-        width: 598px;
+        width: 32em;
+    }
+
+    .buttons_set .ui.icon.button {
+        margin-left: -1.3em !important;
+    }
+
+    .buttons_set .icon {
+        font-size: 1.2em;
+    }
+
+    .buttons_set .ui.floating.label {
+        margin-left: -1.8em !important;
+        margin-top: -1.2em !important;
     }
 }

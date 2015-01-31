@@ -52,7 +52,9 @@ var controller = {
         var profile = socket.conn.request.user;
         onlineUsers[socket.conn.id] = profile;
         sendMessage('chat__userCame', {
-            nickname: profile.displayName
+            nickname: profile.displayName,
+            avatar: getAvatar(profile),
+            link: profile.link
         }, socket);
         socket.emit('chat__previousMessages', lastMessages);
         log('User #' + socket.conn.id + ' connected (' + profile.displayName + ')');
