@@ -71,6 +71,7 @@ $(function() {
         userlist.remove(data.nickname /* TODO: заменить на норм айди */);
     });
     socket.on('chat__previousMessages', messages.showPrevMessages);
+    socket.on('chat__currentlyOnline', userlist.addUsers);
     socket.on('chat__typing', typing.add);
     socket.on('chat__stoppedTyping', typing.remove);
 

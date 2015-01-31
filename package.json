@@ -39,6 +39,7 @@
     "passport-google-oauth": "^0.1.5",
     "passport-vkontakte": "^0.3.0",
     "passport.socketio": "^3.4.1",
+    "perfect-scrollbar": "^0.5.8",
     "redis": "^0.12.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",

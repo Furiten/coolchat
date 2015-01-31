@@ -84,5 +84,11 @@ module.exports = {
     userLoggedIn: userLoggedIn,
     userWentAway: userWentAway,
     userMessage: userMessage,
-    showPrevMessages: showPrevMessages
+    showPrevMessages: showPrevMessages,
+    compactify: function() {
+        chatField.addClass('compact');
+    },
+    restoreSize: function() {
+        chatField.removeClass('compact');
+    }
 };

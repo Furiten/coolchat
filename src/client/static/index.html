@@ -36,18 +36,22 @@
         {{list}} {{plural count "набирает сообщение" "набирают сообщение" "набирают сообщение"}}
     </script>
     <script type="text/x-handlebars-template" id="user-list">
+        <div class="userlist_header">Онлайн:</div>
         {{#each users}}
-            <div class="user-item"><a href="{{link}}">
-                <img src="{{avatar}}" class="ui avatar image" data-title="{{name}}" data-variation="inverted">
-            </a></div>
+            <a href="{{link}}" class="user-item">
+                <img src="{{avatar}}" class="ui avatar image">
+                <span class="user-name">{{name}}</span>
+            </a>
         {{/each}}
+        <div class="scroller__track">
+            <div class="scroller__bar"></div>
+        </div>
     </script>
 </head>
 <body>
 <div class="full height">
     <div class="main container">
         <div class="mainchat">
-            <div class="field_chat"></div>
             <div class="buttons_container">
                 <div class="buttons_set">
                     <div>
@@ -56,16 +60,18 @@
                         </div>
                     </div>
                     <div>&nbsp;</div>
-                    <div>
-                        <div class="circular ui icon button" title="Кто онлайн">
+                    <div class="userlist_button_container">
+                        <div class="circular ui icon button userlist_button" title="Кто онлайн">
                             <i class="icon users"></i>
                         </div>
-                        <div class="floating ui circular teal label">22</div>
+                        <div class="floating ui circular teal label userlist_count">0</div>
+                        <div class="ui popup userlist scroller"></div>
                     </div>
                 </div>
             </div>
+            <div class="field_chat"></div>
             <div class="controls">
-                <div class="ui raised segment now_typing">lorem ipsum </div>
+                <div class="ui raised segment now_typing"></div>
                 <div class="ui raised segment">
                     <textarea class="field_message"></textarea>
                 </div>
@@ -78,7 +84,6 @@
             Соединение потеряно. <br><br> Можно подождать или <a class="reload_page" href="#">перезагрузить страницу</a>
         </div>
     </div>
-    <div class="ui flowing popup userlist"></div>
 </div>
 <audio id='chat_messageSound' src=""></audio>
 </body>

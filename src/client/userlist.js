@@ -1,126 +1,46 @@
+var _ = require('lodash');
 var $ = require('jquery');
 var hb = require('handlebars');
-var userList = {
-    "Oleg Klimenko": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko1": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko2": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko3": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko4": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko5": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko6": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko7": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko8": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenko9": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa1": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa2": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa3": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa4": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa5": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa6": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa7": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa8": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    },
-    "Oleg Klimenkoa9": {
-        link: '#',
-        name: 'Oleg Klimenko',
-        avatar: 'https://lh4.googleusercontent.com/-eFY4GowkI_g/AAAAAAAAAAI/AAAAAAAAAj0/vMv5bpK3n4o/photo.jpg'
-    }
-};
+var messages = require('./messages');
+require('perfect-scrollbar');
+var usersCount = 0;
+var userList = {};
 var userListNode;
 var userListTemplate;
+var userCountNode;
 
 $(function() {
     userListNode = $('.userlist');
     userListTemplate = hb.compile($('#user-list').html());
+    userCountNode = $('.userlist_count');
 
     updateUserList();
+    var popup = $('.userlist_button').popup({
+        target: '.userlist_button_container',
+        popup: '.popup.userlist',
+        on: 'click',
+        hoverable: false,
+        movePopup: false,
+        onShow: messages.compactify,
+        onHidden: messages.restoreSize
+    });
+
+    $('.scroller').perfectScrollbar({
+        suppressScrollX: true
+    });
 });
 
 function updateUserList() {
     userListNode.html(userListTemplate({
         users: userList
     }));
-
-    $('.userlist .avatar[data-title]').popup({position: 'left center'});
+    userCountNode.html(usersCount);
 }
 
 function addUser(id, name, avatar, link) {
+    if (!userList[id]) {
+        usersCount++;
+    }
     userList[id] = {
         name: name,
         avatar: avatar,
@@ -132,11 +52,28 @@ function addUser(id, name, avatar, link) {
 function removeUser(id) {
     if (userList[id]) {
         delete userList[id];
+        usersCount--;
         updateUserList();
     }
 }
 
+function addUsers(uList) {
+    _.each(uList, function(user) {
+        if (!userList[user.nickname/* TODO: заменить на норм айди */]) {
+            usersCount++;
+        }
+        userList[user.nickname/* TODO: заменить на норм айди */] = {
+            name: user.nickname,
+            avatar: user.avatar,
+            link: user.link
+        };
+    });
+
+    updateUserList();
+}
+
 module.exports = {
     add: addUser,
-    remove: removeUser
+    remove: removeUser,
+    addUsers: addUsers
 };

@@ -57,6 +57,13 @@ var controller = {
             link: profile.link
         }, socket);
         socket.emit('chat__previousMessages', lastMessages);
+        socket.emit('chat__currentlyOnline', _.map(onlineUsers, function(el) {
+            return {
+                nickname: el.displayName,
+                avatar: getAvatar(el),
+                link: el.link
+            };
+        }));
         log('User #' + socket.conn.id + ' connected (' + profile.displayName + ')');
     },
 
