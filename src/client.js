@@ -11,6 +11,7 @@ var versions = require('./common/version-config');
 var io = require('socket.io-client');
 var unread = require('./client/unread-notifications');
 var userlist = require('./client/userlist');
+var settings = require('./client/settings');
 
 function cleanLocation() {
     var loc = window.location.href;
@@ -82,6 +83,7 @@ $(function() {
     socket.on('pong', hidePreloader);
 
     msgField.trigger('focus');
+    $('select.dropdown').dropdown();
 
     $(window).focus(function() {
         unread.disable();

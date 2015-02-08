@@ -58,7 +58,7 @@ Registry.prototype.get = function(key) {
 
 Registry.prototype.set = function(key, value) {
     if (!key) {
-        this.data = value;
+        this.data = value || {};
         return this.data;
     }
 
@@ -82,5 +82,14 @@ Registry.prototype.clear = function() {
     return this.remove('');
 };
 
-var reg = new Registry();
-module.exports = reg;
+Registry.prototype.saveToStorage = function(key) {
+    if (!window || !window.localStorage) return;
+    window.localStorage.setItem(key, JSON.stringify(this.get()));
+};
+
+Registry.prototype.loadFromStorage = function(key) {
+    if (!window || !window.localStorage) return;
+    this.setup(JSON.parse(window.localStorage.getItem(key)));
+};
+
+module.exports = Registry;

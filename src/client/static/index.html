@@ -55,7 +55,7 @@
             <div class="buttons_container">
                 <div class="buttons_set">
                     <div>
-                        <div class="circular ui icon button" title="Настройки">
+                        <div class="settings_button circular ui icon button" title="Настройки">
                             <i class="icon setting"></i>
                         </div>
                     </div>
@@ -75,6 +75,58 @@
                 <div class="ui raised segment">
                     <textarea class="field_message"></textarea>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui modal" id="settings-page">
+        <i class="close icon"></i>
+        <div class="header">
+            Настройки
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <h4 class="ui dividing header">Уведомления</h4>
+                <div class="field">
+                    <div class="three fields">
+                        <div class="field">
+                            <label>Всплывающие уведомления</label>
+                            <select class="ui dropdown popup-notifications">
+                                <option value="on">Всегда</option>
+                                <option value="highlight">При упоминаниии</option>
+                                <option value="off">Никогда</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Уведомления в заголовке</label>
+                            <select class="ui dropdown title-notifications">
+                                <option value="inactive_page">Включить</option>
+                                <option value="off">Выключить</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Звук сообщения</label>
+                            <select class="ui dropdown sound-notifications">
+                                <option value="on">Всегда</option>
+                                <option value="inactive_page">На неактивных страницах</option>
+                                <option value="off">Никогда</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <h4 class="ui dividing header">Пользователь</h4>
+                <div class="field">
+                    <label>Отображаемое имя</label>
+                    <input type="text" name="first-name" placeholder="Например, JohnDoe" class="display-name">
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui black button">
+                Отмена
+            </div>
+            <div class="ui positive right labeled icon button">
+                Сохранить
+                <i class="checkmark icon"></i>
             </div>
         </div>
     </div>
