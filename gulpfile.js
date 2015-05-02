@@ -11,7 +11,7 @@ var watchify = require('watchify');
 var del = require('del');
 var server = require('gulp-express');
 
-var sourceFile = './src/client.js';
+var sourceFile = './src/client/modules/chat.js';
 var destFile = 'bundle.js';
 var destFolder = './build/';
 

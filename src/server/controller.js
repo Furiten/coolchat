@@ -45,7 +45,7 @@ function getAvatar(profile) {
 
 var controller = {
     'onPing': function(socket) {
-        socket.emit('pong');
+        socket.emit('chat__pong');
     },
 
     'onConnect': function(socket) {
@@ -105,8 +105,8 @@ module.exports = function(_io) {
             console.log('----------');
             controller.onConnect(socket);
             socket.on('disconnect', _.partial(controller.onDisconnect, socket));
-            socket.on('chat__message', _.partial(controller.onChatMessage, socket));
-            socket.on('ping', _.partial(controller.onPing, socket));
+            socket.on('chat__outgoingMessage', _.partial(controller.onChatMessage, socket));
+            socket.on('chat__ping', _.partial(controller.onPing, socket));
             socket.on('chat__userTyping', _.partial(controller.onTyping, socket));
             socket.on('chat__userStoppedTyping', _.partial(controller.onTypingEnd, socket));
         },

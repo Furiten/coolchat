@@ -1,0 +1,45 @@
+/**
+ * Client-side root module
+ */
+
+var $ = require('jquery');
+window.$ = window.jQuery = $;
+require('../../common/handlebars-helpers');
+var _ = require('lodash');
+var bindRemoteEvents = require('./api/remoteEvents');
+var eventBus = require('../../common/eventBus');
+var Registry = require('../../common/registry');
+var registry = new Registry();
+
+var childModules = [
+    require('./browserWindow'),
+    require('./messageList'),
+    require('./userList'),
+    require('./writeBoard'),
+    require('./toolButtons'),
+    require('./settingsPage'),
+    require('./disconnectedLoader')
+];
+
+function initModules() {
+    _.each(childModules, function(module) {
+        module(eventBus, registry);
+    });
+}
+
+$(function() {
+    bindRemoteEvents(); // bind common socket.io and eventBus events
+    initModules();
+    eventBus.publish('client__pageLoaded');
+    eventBus.on('reconnect', function() {
+        eventBus.publish('chat__ping');
+    });
+
+    $(window).focus(function() {
+        eventBus.publish('client__windowFocused');
+    });
+
+    $(window).blur(function() {
+        eventBus.publish('client__windowBlurred');
+    });
+});
