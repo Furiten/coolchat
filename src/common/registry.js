@@ -21,6 +21,8 @@ function setInTree(tree, key, value) {
     for (var i = 0; i < pieces.length - 1; i++) {
         if (result[pieces[i]] === undefined) {
             result = result[pieces[i]] = {};
+        } else {
+            result = result[pieces[i]];
         }
     }
 

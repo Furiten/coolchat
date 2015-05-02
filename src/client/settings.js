@@ -6,7 +6,11 @@ var Registry = require('../common/registry');
 var settings = new Registry();
 settings.loadFromStorage(SETTINGS_KEY);
 
-var modal, popupNotificationsSelect, titleNotificationsSelect, soundNotificationsSelect, displayNameInput;
+var modal,
+    popupNotificationsSelect = '#settings-page .popup-notifications',
+    titleNotificationsSelect = '#settings-page .title-notifications',
+    soundNotificationsSelect = '#settings-page .sound-notifications',
+    displayNameInput = '#settings-page .display-name';
 
 $(function() {
     fromRegistryToForm();
@@ -22,20 +26,19 @@ $(function() {
 });
 
 function fromFormToRegistry() {
-    settings.set('notifications.popup', $('#settings-page .popup-notifications').dropdown('get value'));
-    settings.set('notifications.title', $('#settings-page .title-notifications').dropdown('get value'));
-    settings.set('notifications.sound', $('#settings-page .sound-notifications').dropdown('get value'));
-    settings.set('user.displayName', $('#settings-page .display-name').val())
+    settings.set('notifications.popup', $(popupNotificationsSelect).dropdown('get value'));
+    settings.set('notifications.title', $(titleNotificationsSelect).dropdown('get value'));
+    settings.set('notifications.sound', $(soundNotificationsSelect).dropdown('get value'));
+    settings.set('user.displayName', $(displayNameInput).val());
 
-    console.log(settings.data);
     settings.saveToStorage(SETTINGS_KEY);
 }
 
 function fromRegistryToForm() {
-    $('#settings-page .popup-notifications').dropdown('set value', settings.get('notifications.popup'));
-    $('#settings-page .title-notifications').dropdown('set value', settings.get('notifications.title'));
-    $('#settings-page .sound-notifications').dropdown('set value', settings.get('notifications.sound'));
-    $('#settings-page .display-name').val(settings.get('user.displayName'));
+    $(popupNotificationsSelect).dropdown('set value', settings.get('notifications.popup'));
+    $(titleNotificationsSelect).dropdown('set value', settings.get('notifications.title'));
+    $(soundNotificationsSelect).dropdown('set value', settings.get('notifications.sound'));
+    $(displayNameInput).val(settings.get('user.displayName'));
 }
 
 module.exports = {
