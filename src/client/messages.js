@@ -5,6 +5,7 @@ var msgTemplate, chatField;
 var dateFormat = require('../common/dateformat');
 var html = require('../common/html');
 var unread = require('./unread-notifications');
+var settings = require('./settings');
 //var emoji = require('emoji');
 
 $(function() {

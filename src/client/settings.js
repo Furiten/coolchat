@@ -13,11 +13,10 @@ var modal,
     displayNameInput = '#settings-page .display-name';
 
 $(function() {
-    fromRegistryToForm();
-
     modal = $('#settings-page').modal({
         onDeny: fromRegistryToForm,
-        onApprove: fromFormToRegistry
+        onApprove: fromFormToRegistry,
+        onShow: fromRegistryToForm
     });
 
     $(".settings_button").on('click', function() {
@@ -35,13 +34,17 @@ function fromFormToRegistry() {
 }
 
 function fromRegistryToForm() {
-    $(popupNotificationsSelect).dropdown('set value', settings.get('notifications.popup'));
-    $(titleNotificationsSelect).dropdown('set value', settings.get('notifications.title'));
-    $(soundNotificationsSelect).dropdown('set value', settings.get('notifications.sound'));
+    $(popupNotificationsSelect).dropdown('set selected', settings.get('notifications.popup'));
+    $(titleNotificationsSelect).dropdown('set selected', settings.get('notifications.title'));
+    $(soundNotificationsSelect).dropdown('set selected', settings.get('notifications.sound'));
     $(displayNameInput).val(settings.get('user.displayName'));
 }
 
 module.exports = {
-    get: settings.get,
-    set: settings.set
+    'get': function(key) {
+        return settings.get(key);
+    },
+    'set': function(key, value) {
+        return settings.set(key, value);
+    }
 };

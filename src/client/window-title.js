@@ -1,7 +1,28 @@
+/**
+ * Notifications through window title
+ * @type {exports}
+ */
+
+var settings = require('./settings');
 var $ = require('jquery');
 var unreadInterval = null;
 
+function clearTitle() {
+    if (unreadInterval) {
+        var title = $('title');
+        window.clearInterval(unreadInterval);
+        unreadInterval = null;
+        title.html(title.attr('data-original'));
+        title.removeAttr('data-original');
+    }
+}
+
 function updateTitle(messagesCount) {
+    if (settings.get('notifications.title') == 'off') {
+        clearTitle();
+        return;
+    }
+
     var title = $('title');
     if (messagesCount) {
         if (unreadInterval) {
@@ -21,12 +42,7 @@ function updateTitle(messagesCount) {
             }
         }, 2000);
     } else {
-        if (unreadInterval) {
-            window.clearInterval(unreadInterval);
-            unreadInterval = null;
-            title.html(title.attr('data-original'));
-            title.removeAttr('data-original');
-        }
+        clearTitle();
     }
 }
 

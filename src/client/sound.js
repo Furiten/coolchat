@@ -1,5 +1,9 @@
+/**
+ * Notifications through Audio API
+ */
 var sound;
 var $ = require('jquery');
+var settings = require('./settings');
 
 $(function() {
     sound = document.getElementById('chat_messageSound');
@@ -8,6 +12,7 @@ $(function() {
 
 module.exports = {
     play: function() {
+        if (settings.get('notifications.sound') == 'off') return;
         sound.play();
     }
 };

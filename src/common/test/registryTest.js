@@ -4,6 +4,10 @@ var reg = new Registry();
 var assert = require('assert');
 
 describe('Registry component', function() {
+    beforeEach(function() {
+        reg.setup(null);
+    });
+
     afterEach(function() {
         reg.clear();
         assert.equal(_.size(reg.get()), 0);
@@ -36,5 +40,18 @@ describe('Registry component', function() {
         assert.equal(reg.get('testKey.subKey4'), 1);
         assert.equal(_.size(reg.get()), 1);
         assert.equal(_.size(reg.get('testKey')), 4);
+    });
+
+    it('should get undefined for inexisting simple key', function() {
+        assert.equal(reg.get('someOops'), undefined);
+    });
+
+    it('should get undefined for inexisting complex key', function() {
+        assert.equal(reg.get('someOops.deeperOops'), undefined);
+    });
+
+    it('should get undefined for inexisting complex key inside of existing key', function() {
+        reg.set('testKey.subKey1', 1);
+        assert.equal(reg.get('testKey.deeperOops'), undefined);
     });
 });

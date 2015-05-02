@@ -1,3 +1,9 @@
+/**
+ * Notification API Popups
+ * @type {exports}
+ */
+
+var settings = require('./settings');
 var $ = require('jquery');
 $(initNotifications);
 
@@ -47,6 +53,7 @@ function disableNotifications() {
 }
 
 function notificationsSupported() {
+    if (settings.get('notifications.popup') == 'off') return false;
     return !!window.Notification;
 }
 
