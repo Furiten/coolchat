@@ -20,9 +20,15 @@ module.exports = function(eventBus, registry) {
         chatField.removeClass('compact');
     });
 
+    eventBus.on('client__windowFocused', function() {
+        if (chatField.find('.chat_message').last().hasClass('last_read_message')) {
+            chatField.find('.chat_message').removeClass('last_read_message');
+        }
+    });
     eventBus.on('client__windowBlurred', function() {
-        chatField.find('.chat_message').css('border-bottom', '0px');
-        chatField.find('.chat_message').last().css('border-bottom', '1px solid #333');
+        chatField.find('.chat_message').removeClass('last_read_message');
+        chatField.find('.chat_message').last().addClass('last_read_message');
+        window.scrollTo(0, document.body.scrollHeight + 100);
     });
 
     function showMessage(msg) {
