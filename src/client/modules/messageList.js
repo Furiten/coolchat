@@ -1,6 +1,6 @@
 var _ = require('lodash');
-var dateFormat = require('../../common/dateformat');
 var html = require('../../common/html');
+var messageVm = require('./messageViewModel');
 
 module.exports = function(eventBus, registry) {
     var msgTemplate = require('../templates/message.hbs'),
@@ -26,23 +26,8 @@ module.exports = function(eventBus, registry) {
     });
 
     function showMessage(msg) {
-        chatField.append(msgTemplate({
-            userMessage: msg.type == 'userMessage',
-            userCame: msg.type == 'userCame',
-            userWentAway: msg.type == 'userWentAway',
-            dateTime: dateFormat.pattern(msg.date, 'Y-m-d @ H:i:s'),
-            username: msg.username,
-            avatar: msg.avatar,
-            content: msg.content ? msgPrefilters(msg.content) : null
-        }));
-
+        chatField.append(msgTemplate(messageVm(msg)));
         window.scrollTo(0, document.body.scrollHeight + 100);
-    }
-
-    function msgPrefilters(msg) {
-        msg = html.nl2br(msg);
-//    msg = emoji.unifiedToHTML(msg); // TODO: emoji in textarea, see client/emojiarea.js
-        return msg;
     }
 
     function userLoggedIn(data) {
