@@ -38,7 +38,7 @@ module.exports = function(eventBus, registry) {
     }
 
     function updateTitle(messagesCount) {
-        if (settings.get('notifications.title') == 'off') {
+        if (registry.get('notifications.title') == 'off') {
             clearTitle();
             return;
         }
