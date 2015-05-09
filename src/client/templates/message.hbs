@@ -1,0 +1,23 @@
+{{#if userMessage}}
+    <div class='chat_message ui segment'>
+        {{#if avatar}}
+            <div class="message_avatar"><img class="ui avatar image" src="{{avatar}}" alt="" /></div>
+        {{/if}}
+        <div class="message_username">{{username}}</div>
+        <div class="message_content">{{content}}</div>
+        <div class="right floated ui horizontal label">{{dateTime}}</div>
+    </div>
+{{else}}
+    {{#if userCame}}
+        <div class='chat_message ui segment'>
+            К нам приходит {{username}}!
+            <div class="right floated ui horizontal label">{{dateTime}}</div>
+        </div>
+    {{/if}}
+    {{#if userWentAway}}
+        <div class='chat_message ui segment'>
+            От нас уходит {{username}}.
+            <div class="right floated ui horizontal label">{{dateTime}}</div>
+        </div>
+    {{/if}}
+{{/if}}

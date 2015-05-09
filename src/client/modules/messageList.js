@@ -1,14 +1,12 @@
 var _ = require('lodash');
-var hb = require('handlebars');
 var dateFormat = require('../../common/dateformat');
 var html = require('../../common/html');
 
 module.exports = function(eventBus, registry) {
-    var msgTemplate, chatField;
-
+    var msgTemplate = require('../templates/message.hbs'),
+        chatField;
     eventBus.on('client__pageLoaded', function() {
         chatField = $('.field_chat');
-        msgTemplate = hb.compile($('#message-tpl').html());
     });
 
     eventBus.on('chat__userCame', userLoggedIn);

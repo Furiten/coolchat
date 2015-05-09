@@ -1,0 +1,88 @@
+<div class="full height">
+    <div class="main container">
+        <div class="mainchat">
+            <div class="buttons_container">
+                <div class="buttons_set">
+                    <div>
+                        <div class="settings_button circular ui icon button" title="Настройки">
+                            <i class="icon setting"></i>
+                        </div>
+                    </div>
+                    <div>&nbsp;</div>
+                    <div class="userlist_button_container">
+                        <div class="circular ui icon button userlist_button" title="Кто онлайн">
+                            <i class="icon users"></i>
+                        </div>
+                        <div class="floating ui circular teal label userlist_count">0</div>
+                        <div class="ui popup userlist scroller"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="field_chat"></div>
+            <div class="controls">
+                <div class="ui raised segment now_typing"></div>
+                <div class="ui raised segment">
+                    <textarea class="field_message"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui modal" id="settings-page">
+        <i class="close icon"></i>
+        <div class="header">
+            Настройки
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <h4 class="ui dividing header">Уведомления</h4>
+                <div class="field">
+                    <div class="three fields">
+                        <div class="field">
+                            <label>Всплывающие уведомления</label>
+                            <select class="ui dropdown popup-notifications">
+                                <option value="on">Всегда</option>
+                                <option value="highlight">При упоминаниии</option>
+                                <option value="off">Никогда</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Уведомления в заголовке</label>
+                            <select class="ui dropdown title-notifications">
+                                <option value="inactive_page">Включить</option>
+                                <option value="off">Выключить</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Звук сообщения</label>
+                            <select class="ui dropdown sound-notifications">
+                                <option value="on">Всегда</option>
+                                <option value="inactive_page">На неактивных страницах</option>
+                                <option value="off">Никогда</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <h4 class="ui dividing header">Пользователь</h4>
+                <div class="field">
+                    <label>Отображаемое имя</label>
+                    <input type="text" name="first-name" placeholder="Например, JohnDoe" class="display-name">
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui black button">
+                Отмена
+            </div>
+            <div class="ui positive right labeled icon button">
+                Сохранить
+                <i class="checkmark icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="loader_overlay">
+        <div class="ui loader active"></div>
+        <div class="content">
+            Соединение потеряно. <br><br> Можно подождать или <a class="reload_page" href="#">перезагрузить страницу</a>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,6 @@
-var hb = require('handlebars');
-var plural = require('./plural');
+var plural = require('../plural');
 
-hb.registerHelper('plural', function(count, form1, form2, form3) {
+module.exports = function(count, form1, form2, form3) {
     switch (plural(count)) {
         case 'singular':
             return form1;
@@ -11,4 +10,4 @@ hb.registerHelper('plural', function(count, form1, form2, form3) {
             return form3;
         default:;
     }
-});
+};

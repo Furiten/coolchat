@@ -4,7 +4,6 @@
 
 var $ = require('jquery');
 window.$ = window.jQuery = $;
-require('../../common/handlebars-helpers');
 var _ = require('lodash');
 var bindRemoteEvents = require('./api/remoteEvents');
 var eventBus = require('../../common/eventBus');
@@ -28,8 +27,10 @@ function initModules() {
 }
 
 $(function() {
+    $('body').append(require('../templates/chat.hbs'));
     bindRemoteEvents(); // bind common socket.io and eventBus events
     initModules();
+
     eventBus.publish('client__pageLoaded');
     eventBus.on('reconnect', function() {
         eventBus.publish('chat__ping');

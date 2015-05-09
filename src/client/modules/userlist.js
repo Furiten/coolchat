@@ -1,10 +1,9 @@
 var _ = require('lodash');
-var hb = require('handlebars');
 
 module.exports = function(eventBus, registry) {
     var userList = {};
     var userListNode;
-    var userListTemplate;
+    var userListTemplate = require('../templates/userlist.hbs');
 
     eventBus.on('client__pageLoaded', initModule);
     eventBus.on('chat__userCame', addUser);
@@ -14,7 +13,6 @@ module.exports = function(eventBus, registry) {
     function initModule() {
         require('perfect-scrollbar');
         userListNode = $('.userlist');
-        userListTemplate = hb.compile($('#user-list').html());
 
         updateUserList();
 

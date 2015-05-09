@@ -1,64 +1,74 @@
 'use strict';
 
-var browserify = require('browserify');
+var webpack = require("webpack");
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
 var watch = require('gulp-watch');
-var watchify = require('watchify');
+var gutil = require('gulp-util');
 var del = require('del');
 var server = require('gulp-express');
 
-var sourceFile = './src/client/modules/chat.js';
-var destFile = 'bundle.js';
-var destFolder = './build/';
+var webpackDevConfig = {
+    entry: './client/modules/chat.js',
+    context: __dirname + '/src',
 
-function handleErrors(msg) {
-    console.log(msg);
-}
+    output: {
+        path: __dirname + '/build',
+        filename: 'bundle.js'
+    },
 
-gulp.task('build-js', function() {
-    var bundler = browserify({
-        entries: [sourceFile]
+    devtool: "#inline-source-map",
+    watch: true,
+
+    plugins: [
+        new webpack.optimize.DedupePlugin()
+    ],
+
+    module: {
+        loaders: [
+            {test: /\.hbs/, loader: 'handlebars-loader?helpersDirs[]=./common/handlebars-helpers'},
+            {
+                test: /\.(eot|woff|ttf|svg|png|jpg)$/,
+                loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'
+            }
+        ]
+    }
+};
+
+var webpackReleaseConfig = {
+    entry: './src/client/modules/chat.js',
+    context: __dirname + '/src',
+
+    output: {
+        path: __dirname + '/build',
+        filename: 'bundle.js'
+    },
+
+    plugins: [
+        new webpack.optimize.DedupePlugin(),
+        new webpack.optimize.UglifyJsPlugin()
+    ]
+};
+
+gulp.task('dev', ['server'], function(callback) {
+    // run webpack
+    webpack(webpackDevConfig, function(err, stats) {
+        if(err) throw new gutil.PluginError("webpack", err);
+        gutil.log("[webpack]", stats.toString({
+            // output options
+        }));
     });
-
-    var bundle = function() {
-        return bundler.bundle()
-            .on('error', handleErrors)
-            .pipe(source(destFile))
-            .pipe(buffer())
-            .pipe(sourcemaps.init())
-            .pipe(uglify())
-            .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest(destFolder));
-    };
-
-    return bundle();
 });
 
-gulp.task('watch-js', function() {
-    var bundler = browserify({
-        // Required watchify args
-        cache: {}, packageCache: {}, fullPaths: true,
-        // Browserify Options
-        entries: [sourceFile],
-        debug: true
+gulp.task('release', ['move-static'], function(callback) {
+    // run webpack
+    webpack(webpackReleaseConfig, function(err, stats) {
+        if(err) throw new gutil.PluginError("webpack", err);
+        gutil.log("[webpack]", stats.toString({
+            // output options
+        }));
+        callback();
     });
-
-    var bundle = function() {
-        return bundler
-            .bundle()
-            .on('error', handleErrors)
-            .pipe(source(destFile))
-            .pipe(gulp.dest(destFolder));
-    };
-
-    bundler = watchify(bundler);
-    bundler.on('update', bundle);
-
-    return bundle();
 });
 
 gulp.task('watch-static', ['move-static'], function() {
@@ -88,5 +98,4 @@ gulp.task('clean', function(cb) {
     ]);
 });
 
-gulp.task('default', ['watch-js', 'server', 'watch-static']);
-gulp.task('release', ['build-js', 'move-static']);
+gulp.task('default', ['dev', 'watch-static']);

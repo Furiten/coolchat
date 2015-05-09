@@ -1,15 +1,10 @@
 var _ = require('lodash');
-var hb = require('handlebars');
 
 module.exports = function(eventBus, registry) {
     var typingUsers = {};
     var typingUsersCount = 0;
     var typingTimer = null;
-    var typingTemplate;
-
-    eventBus.on('client__pageLoaded', function() {
-        typingTemplate = hb.compile($('#typing-tpl').html());
-    });
+    var typingTemplate = require('../..//templates/typing.hbs');
 
     eventBus.on('chat__typing', addTypingUser);
     eventBus.on('chat__stoppedTyping', removeTypingUser);
