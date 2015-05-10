@@ -1,12 +1,11 @@
 var express = require('express');
 var session = require('express-session');
-var redis = require('redis');
 var RedisStore = require('connect-redis')(session);
 var sessionStore = new RedisStore({
-    client: redis.createClient(),
+    client: require('./redis'),
     host: 'localhost',
     port: 6379,
-    prefix: 'coolchat_'
+    prefix: 'coolchatsession_'
 });
 var passportSocketIo = require("passport.socketio");
 var cookieParser = require('cookie-parser');

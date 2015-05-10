@@ -9,6 +9,7 @@ var http = require('http').Server(app);
 var path = require('path');
 var io = require('socket.io')(http);
 var controller = require('./server/controller')(io);
+var authController = require('./server/authController');
 var passport = require('./server/passport-utils')(controller);
 var versions = require('./common/version-config');
 
@@ -17,12 +18,20 @@ require('./server/routes/auth')(app, passport);
 require('./server/routes/static')(app);
 
 app.get('/', function(req, res) {
-    if (req.cookies[versions.authCookieName] != versions.authCookieHash && req.query[versions.authCookieName] != versions.authCookieHash) {
-        res.sendFile(path.resolve(__dirname + '/../build/static/select_auth_provider.html'));
-    } else {
-        res.cookie(versions.authCookieName, versions.authCookieHash);
+    authController.authorizeUser(req.cookies[versions.authCookieName] || req.query[versions.authCookieName], function(err, status, cookie) {
+        if (err) {
+            res.sendFile(path.resolve(__dirname + '/../build/static/select_auth_provider.html'));
+            return;
+        }
+
+        res.cookie(versions.authCookieName, cookie, {
+            // todo: не ставится с доменом. разобраться
+            //domain: versions.cookieDomain,
+            expires: new Date(Date.now() + 1000*60*60*24*7)
+        });
+        // todo: update user expiration in redis here
         res.sendFile(path.resolve(__dirname + '/../build/static/index.html'));
-    }
+    });
 });
 
 http.listen(3000, function() {
