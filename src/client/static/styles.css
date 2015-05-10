@@ -219,11 +219,9 @@
     padding: 0.5em;
 }
 
-.buttons_set .ui.floating.label {
-    top: auto;
-    left: auto;
+.usercount_wrapper {
+    position: absolute;
 }
-
 
 @media only screen and (min-width: 800px) {
     .main.container, .buttons_container {
@@ -246,9 +244,8 @@
         margin-left: -1em;
     }
 
-    .buttons_set .ui.floating.label {
-        margin-left: -1.7em !important;
-        margin-top: -1.5em !important;
+    .usercount_wrapper {
+        margin-left: 2em;
     }
 
     .chat_message.last_read_message:after {
@@ -282,9 +279,8 @@
         font-size: 1.2em;
     }
 
-    .buttons_set .ui.floating.label {
-        margin-left: -1.8em !important;
-        margin-top: -1.2em !important;
+    .usercount_wrapper {
+        margin-left: 1.6em;
     }
 
     .chat_message.last_read_message:after {
