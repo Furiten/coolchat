@@ -36,6 +36,24 @@ AuthController.prototype.saveUser = function(data) {
     return data.id + '__' + cookie;
 };
 
+AuthController.prototype.logoutUser = function(cookieValue) {
+    if (!cookieValue) return;
+    var parts = cookieValue.split('__');
+    redis.get('user_' + parts[0], function(err, reply) {
+        try {
+            var dbData = JSON.parse(reply);
+            if (err || dbData.cookie != parts[1]) {
+                throw new TypeError();
+            }
+        } catch (e) {
+            return;
+        }
+
+        redis.del('user_' + dbData.data.id);
+    });
+
+};
+
 AuthController.prototype.generateCookie = function() {
     return uuid.v4();
 };

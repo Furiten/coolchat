@@ -61,4 +61,10 @@ module.exports = function(eventBus, registry) {
     $(".settings_button").on('click', function() {
         eventBus.publish('chat__settingsButtonClicked');
     });
+
+    // 3) logout button
+
+    $('.logout_button').on('click', function() {
+        eventBus.publish('chat__logoutButtonClicked');
+    });
 };

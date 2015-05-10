@@ -17,6 +17,14 @@ require('./server/express-middlewares')(app, io, passport); // Exec middlewares 
 require('./server/routes/auth')(app, passport);
 require('./server/routes/static')(app);
 
+function setAuthCookie(res, cookie, del) {
+    res.cookie(versions.authCookieName, cookie, {
+        // todo: не ставится с доменом. разобраться
+        //domain: versions.cookieDomain,
+        expires: del ? new Date(Date.now() - 1000*60*60*24*7) : new Date(Date.now() + 1000*60*60*24*7)
+    });
+}
+
 app.get('/', function(req, res) {
     authController.authorizeUser(req.cookies[versions.authCookieName] || req.query[versions.authCookieName], function(err, status, cookie) {
         if (err) {
@@ -24,14 +32,16 @@ app.get('/', function(req, res) {
             return;
         }
 
-        res.cookie(versions.authCookieName, cookie, {
-            // todo: не ставится с доменом. разобраться
-            //domain: versions.cookieDomain,
-            expires: new Date(Date.now() + 1000*60*60*24*7)
-        });
+        setAuthCookie(res, cookie);
         // todo: update user expiration in redis here
         res.sendFile(path.resolve(__dirname + '/../build/static/index.html'));
     });
+});
+
+app.get('/logout', function(req, res) {
+    authController.logoutUser(req.cookies[versions.authCookieName]);
+    setAuthCookie(res, '', true);
+    res.redirect('/');
 });
 
 http.listen(3000, function() {

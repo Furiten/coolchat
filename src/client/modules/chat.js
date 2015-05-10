@@ -43,4 +43,8 @@ $(function() {
     $(window).blur(function() {
         eventBus.publish('client__windowBlurred');
     });
+
+    eventBus.on('chat__logoutButtonClicked', function() {
+        location.href = '/logout';
+    });
 });
