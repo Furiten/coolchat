@@ -4,28 +4,27 @@ module.exports = function(eventBus, registry) {
     // 1) userlist button
 
     var usersCount = 0;
-    var userCountNode;
+    var userCountNode, userlistButtonNode;
     var usersHash = {};
+    var userlistVisible = false;
 
     eventBus.on('client__pageLoaded', initUserCountButton);
     eventBus.on('chat__userCame', addUser);
     eventBus.on('chat__userDisconnected', removeUser);
     eventBus.on('chat__currentlyOnline', addUsers);
+    eventBus.on('chat__userlistAppeared', function() {
+        userlistButtonNode.addClass('active');
+    });
+    eventBus.on('chat__userlistDisappeared', function() {
+        userlistButtonNode.removeClass('active');
+    });
 
     function initUserCountButton() {
         userCountNode = $('.userlist_count');
-        var popup = $('.userlist_button').popup({
-            target: '.userlist_button_container',
-            popup: '.popup.userlist',
-            on: 'click',
-            hoverable: false,
-            movePopup: false,
-            onShow: function () {
-                eventBus.publish('chat__userlistAppeared');
-            },
-            onHidden: function () {
-                eventBus.publish('chat__userlistDisappeared');
-            }
+        userlistButtonNode = $('.userlist_button');
+        userlistButtonNode.on('click', function() {
+            userlistVisible = !userlistVisible;
+            eventBus.publish(userlistVisible ? 'chat__userlistAppeared' : 'chat__userlistDisappeared');
         });
     }
 

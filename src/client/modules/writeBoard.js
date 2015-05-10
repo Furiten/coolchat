@@ -6,6 +6,13 @@ module.exports = function(eventBus, registry) {
         require('./writeBoard/chatField')
     ];
 
+    eventBus.on('chat__userlistAppeared', function() {
+        $('.controls').addClass('compact');
+    });
+    eventBus.on('chat__userlistDisappeared', function() {
+        $('.controls').removeClass('compact');
+    });
+
     _.each(childModules, function(module) {
         module(eventBus, registry);
     });

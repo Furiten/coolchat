@@ -63,6 +63,7 @@
     position: absolute;
     right: 0;
     top: 0;
+    margin-right: 0.4em;
 }
 
 .message_date {
@@ -146,21 +147,25 @@
 }
 
 .userlist {
-    width: 16em;
-    height: 40em;
-    overflow: hidden;
-    position: absolute;
-    top: -5.5em !important;
-    left: -12.5em !important;
-    box-shadow: 4px 0 15px 0 rgba(0,0,0,0.3) !important;
+    display: none;
+    border-left: 1px solid #999;
+    padding-left: 0.7em;
+    width: 100px;
+    height: 100%;
+    position: fixed;
+    top: 0;
 }
 
-.userlist:before {
-    display: none;
+.userlist.active {
+    display: block;
 }
 
 .userlist_button_container {
     position: relative;
+}
+
+.userlist_button.active {
+    background-color: #aaa !important;
 }
 
 .userlist .user-item {
@@ -181,20 +186,7 @@
 }
 
 .userlist .user-item:first-of-type {
-    margin-top: 2em;
-}
-
-.userlist .userlist_header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2em;
-    padding-top: 0.3em;
-    border-bottom: 1px solid #ccc;
-    background-color: #eee;
-    font-weight: bold;
-    text-align: center;
+    margin-top: 0.7em;
 }
 
 .buttons_container {
@@ -233,11 +225,20 @@
     }
 
     .field_chat.compact {
-        width: 41em;
+        width: 38em;
     }
 
     .controls {
         width: 52.7em;
+    }
+
+    .controls.compact {
+        width: 40em;
+    }
+
+    .userlist {
+        margin-left: 38em;
+        width: 11.7em;
     }
 
     .buttons_set .ui.icon.button {
@@ -267,8 +268,17 @@
         width: 32em;
     }
 
+    .controls.compact {
+        width: 23em;
+    }
+
     .field_chat.compact {
         width: 21em;
+    }
+
+    .userlist {
+        width: 8em;
+        margin-left: 21em;
     }
 
     .buttons_set .ui.icon.button {

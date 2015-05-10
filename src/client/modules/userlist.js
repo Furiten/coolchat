@@ -9,6 +9,12 @@ module.exports = function(eventBus, registry) {
     eventBus.on('chat__userCame', addUser);
     eventBus.on('chat__userDisconnected', removeUser);
     eventBus.on('chat__currentlyOnline', addUsers);
+    eventBus.on('chat__userlistAppeared', function() {
+        userListNode.addClass('active');
+    });
+    eventBus.on('chat__userlistDisappeared', function() {
+        userListNode.removeClass('active');
+    });
 
     function initModule() {
         require('perfect-scrollbar');
@@ -29,7 +35,7 @@ module.exports = function(eventBus, registry) {
 
     function addUser(data) {
         var id = data.nickname, /* TODO: заменить на норм айди */
-            name = data.nickname,
+            name = data.nickname.split(' ')[0], // TODO: заменить на имя из поля
             avatar = data.avatar,
             link = data.link;
 
@@ -53,7 +59,7 @@ module.exports = function(eventBus, registry) {
     function addUsers(uList) {
         _.each(uList, function(user) {
             userList[user.nickname/* TODO: заменить на норм айди */] = {
-                name: user.nickname,
+                name: user.nickname.split(' ')[0], // TODO: заменить на имя из поля
                 avatar: user.avatar,
                 link: user.link
             };
