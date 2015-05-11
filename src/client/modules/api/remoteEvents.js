@@ -8,6 +8,7 @@ var incomingEvents = {
         'reconnect'
     ],
     chat: [
+        'identity',
         'currentlyOnline',
         'message',
         'pong',

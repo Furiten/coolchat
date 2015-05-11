@@ -11,6 +11,7 @@ var Registry = require('../../common/registry');
 var registry = new Registry();
 
 var childModules = [
+    require('./identity'),
     require('./browserWindow'),
     require('./messageList'),
     require('./userList'),

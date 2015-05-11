@@ -5,6 +5,7 @@ var messageVm = require('./messageViewModel');
 module.exports = function(eventBus, registry) {
     var msgTemplate = require('../templates/message.hbs'),
         chatField;
+
     eventBus.on('client__pageLoaded', function() {
         chatField = $('.field_chat');
     });
@@ -32,12 +33,16 @@ module.exports = function(eventBus, registry) {
     });
 
     function showMessage(msg) {
+        var currentId = registry.get('identity.id');
+        if (msg.id == currentId && msg.type != 'userMessage') return;
+
         chatField.append(msgTemplate(messageVm(msg)));
         window.scrollTo(0, document.body.scrollHeight + 100);
     }
 
     function userLoggedIn(data) {
         showMessage({
+            id: data.id,
             username: data.nickname,
             avatar: data.avatar,
             date: data.date ? new Date(data.date) : new Date(),
@@ -47,6 +52,7 @@ module.exports = function(eventBus, registry) {
 
     function userMessage(data) {
         showMessage({
+            id: data.id,
             content: data.message,
             username: data.nickname,
             avatar: data.avatar,
@@ -57,6 +63,7 @@ module.exports = function(eventBus, registry) {
 
     function userWentAway(data) {
         showMessage({
+            id: data.id,
             username: data.nickname,
             avatar: data.avatar,
             date: data.date ? new Date(data.date) : new Date(),

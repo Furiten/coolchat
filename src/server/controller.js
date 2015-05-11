@@ -11,11 +11,12 @@ var MAX_LAST_MSGS = 10;
 var userIdsCounter = {}; // для чуваков, которые сидят с нескольких вкладок с одного аккаунта
 
 function addMessageToLast(eventType, data) {
-    if (lastMessages.length >= MAX_LAST_MSGS) {
+    if (_.where(lastMessages, {event: 'chat__message'}).length >= MAX_LAST_MSGS) {
         lastMessages.shift();
     }
 
     lastMessages.push({
+        id: data.id, // user id
         date: new Date(),
         event: eventType,
         nickname: data.nickname,
@@ -61,14 +62,19 @@ var controller = {
     'onConnect': function(socket) {
         var profile = socket.conn.request.user;
         onlineUsers[socket.conn.id] = profile;
-        sendMessage('chat__userCame', {
-            id: profile.id,
-            nickname: profile.displayName,
-            avatar: getAvatar(profile),
-            link: profile.link
-        }, socket);
-        incUserCounter(profile.id);
+
+        socket.emit('chat__identity', profile);
+
         socket.emit('chat__previousMessages', lastMessages);
+        if (userIdsCounter[profile.id] == 0) {
+            sendMessage('chat__userCame', {
+                id: profile.id,
+                nickname: profile.displayName,
+                avatar: getAvatar(profile),
+                link: profile.link
+            }, socket);
+        }
+        incUserCounter(profile.id);
         socket.emit('chat__currentlyOnline', _.map(onlineUsers, function(el) {
             return {
                 id: el.id,
@@ -90,7 +96,7 @@ var controller = {
             delete onlineUsers[socket.conn.id];
         }
 
-        if (!userIdsCounter[profile.id]) {
+        if (userIdsCounter[profile.id] == 0) {
             sendMessage('chat__userDisconnected', {
                 id: profile.id,
                 nickname: profile.displayName,
