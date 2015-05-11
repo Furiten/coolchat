@@ -42,6 +42,7 @@
 }
 
 .controls .now_typing {
+    font-size: 0.8em;
     height: 1.6em;
     padding-left: 2em;
     border-top: 3px solid #ccc;

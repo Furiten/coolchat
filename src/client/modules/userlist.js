@@ -34,7 +34,7 @@ module.exports = function(eventBus, registry) {
     }
 
     function addUser(data) {
-        var id = data.nickname, /* TODO: заменить на норм айди */
+        var id = data.id,
             name = data.nickname.split(' ')[0], // TODO: заменить на имя из поля
             avatar = data.avatar,
             link = data.link;
@@ -49,7 +49,7 @@ module.exports = function(eventBus, registry) {
     }
 
     function removeUser(data) {
-        var id = data.nickname; /* TODO: заменить на норм айди */
+        var id = data.id;
         if (userList[id]) {
             delete userList[id];
             updateUserList();
@@ -58,7 +58,7 @@ module.exports = function(eventBus, registry) {
 
     function addUsers(uList) {
         _.each(uList, function(user) {
-            userList[user.nickname/* TODO: заменить на норм айди */] = {
+            userList[user.id] = {
                 name: user.nickname.split(' ')[0], // TODO: заменить на имя из поля
                 avatar: user.avatar,
                 link: user.link

@@ -29,7 +29,7 @@ module.exports = function(eventBus, registry) {
     }
 
     function addUser(data) {
-        var id = data.nickname; /* TODO: заменить на норм айди */
+        var id = data.id;
         if (!usersHash[id]) {
             userCountNode.html(++usersCount);
             usersHash[id] = 1;
@@ -37,7 +37,7 @@ module.exports = function(eventBus, registry) {
     }
 
     function removeUser(data) {
-        var id = data.nickname; /* TODO: заменить на норм айди */
+        var id = data.id;
         if (usersHash[id]) {
             userCountNode.html(--usersCount);
             delete usersHash[id];
@@ -46,9 +46,9 @@ module.exports = function(eventBus, registry) {
 
     function addUsers(uList) {
         _.each(uList, function(user) {
-            if (!usersHash[user.nickname/* TODO: заменить на норм айди */]) {
+            if (!usersHash[user.id]) {
                 usersCount++;
-                usersHash[user.nickname/* TODO: заменить на норм айди */] = 1;
+                usersHash[user.id] = 1;
             }
         });
 

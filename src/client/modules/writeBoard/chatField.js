@@ -14,7 +14,9 @@ module.exports = function(eventBus, registry) {
             event.preventDefault();
             eventBus.publish('chat__outgoingMessage', msgField.val());
             msgField.val('');
-        } else {
+        }
+
+        if (!event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
             eventBus.publish('client__keyEvent', event);
         }
     }

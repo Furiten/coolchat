@@ -24,6 +24,8 @@ var outgoingEvents = {
 
     ],
     chat: [
+        'userTyping',
+        'userStoppedTyping',
         'outgoingMessage',
         'ping'
     ]

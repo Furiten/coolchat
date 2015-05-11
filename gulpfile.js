@@ -2,6 +2,7 @@
 
 var webpack = require("webpack");
 var gulp = require('gulp');
+var path = require('path');
 var source = require('vinyl-source-stream');
 var watch = require('gulp-watch');
 var gutil = require('gulp-util');
@@ -26,7 +27,10 @@ var webpackDevConfig = {
 
     module: {
         loaders: [
-            {test: /\.hbs/, loader: 'handlebars-loader?helpersDirs[]=./common/handlebars-helpers'},
+            {
+                test: /\.hbs/,
+                loader: 'handlebars-loader'
+            },
             {
                 test: /\.(eot|woff|ttf|svg|png|jpg)$/,
                 loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'

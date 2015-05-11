@@ -1,4 +1,4 @@
-var plural = require('../plural');
+var plural = require('../../common/plural');
 
 module.exports = function(count, form1, form2, form3) {
     switch (plural(count)) {

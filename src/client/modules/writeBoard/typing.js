@@ -16,17 +16,17 @@ module.exports = function(eventBus, registry) {
         });
     });
 
-    function addTypingUser(name) {
-        if (!typingUsers[name]) {
+    function addTypingUser(data) {
+        if (!typingUsers[data.id]) {
             typingUsersCount++;
         }
-        typingUsers[name] = 1;
+        typingUsers[data.id] = data.nickname;
         updateTypingText();
     }
 
-    function removeTypingUser(name) {
-        if (typingUsers[name]) {
-            delete typingUsers[name];
+    function removeTypingUser(data) {
+        if (typingUsers[data.id]) {
+            delete typingUsers[data.id];
             typingUsersCount--;
         }
         updateTypingText();
@@ -36,10 +36,12 @@ module.exports = function(eventBus, registry) {
         if (typingUsersCount == 0) {
             $('.now_typing').html('');
         } else {
-            $('.now_typing').html(typingTemplate({
+            var data = {
                 count: typingUsersCount,
-                list: _.keys(typingUsers).join(', ')
-            }));
+                list: _.values(typingUsers).slice(0, 3).join(', '),
+                othersCount: _.values(typingUsers).slice(3).length
+            };
+            $('.now_typing').html(typingTemplate(data));
         }
     }
 
