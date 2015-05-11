@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var versions = require('../common/version-config');
 var redis = require('./redis');
 var uuid = require('node-uuid');
 

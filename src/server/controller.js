@@ -1,12 +1,14 @@
 var _ = require('lodash');
 var log = require('./log');
 var html = require('../common/html.js');
+var redis = require('./redis');
 var io;
 
 var onlineUsers = {};
 var vkUsers = {};
 var lastMessages = [];
 var MAX_LAST_MSGS = 10;
+var userIdsCounter = {}; // для чуваков, которые сидят с нескольких вкладок с одного аккаунта
 
 function addMessageToLast(eventType, data) {
     if (lastMessages.length >= MAX_LAST_MSGS) {
@@ -43,6 +45,14 @@ function getAvatar(profile) {
     return null;
 }
 
+function incUserCounter(id) {
+    userIdsCounter[id] = userIdsCounter[id] ? userIdsCounter[id] + 1 : 1;
+}
+
+function decUserCounter(id) {
+    userIdsCounter[id] = userIdsCounter[id] ? userIdsCounter[id] - 1 : 0;
+}
+
 var controller = {
     'onPing': function(socket) {
         socket.emit('chat__pong');
@@ -52,13 +62,16 @@ var controller = {
         var profile = socket.conn.request.user;
         onlineUsers[socket.conn.id] = profile;
         sendMessage('chat__userCame', {
+            id: profile.id,
             nickname: profile.displayName,
             avatar: getAvatar(profile),
             link: profile.link
         }, socket);
+        incUserCounter(profile.id);
         socket.emit('chat__previousMessages', lastMessages);
         socket.emit('chat__currentlyOnline', _.map(onlineUsers, function(el) {
             return {
+                id: el.id,
                 nickname: el.displayName,
                 avatar: getAvatar(el),
                 link: el.link
@@ -68,33 +81,51 @@ var controller = {
     },
 
     'onDisconnect': function(socket) {
-        if (onlineUsers[socket.conn.id] !== undefined) {
-            if (onlineUsers[socket.conn.id]) {
-                sendMessage('chat__userDisconnected', {
-                    nickname: onlineUsers[socket.conn.id].displayName
-                });
-                log('User ' + onlineUsers[socket.conn.id].displayName + ' disconnected');
+        var profile = onlineUsers[socket.conn.id];
+        if (profile !== undefined) {
+            if (profile) {
+                decUserCounter(profile.id);
+                log('User ' + socket.conn.id + ' (' + profile.displayName + ') disconnected');
             }
             delete onlineUsers[socket.conn.id];
+        }
+
+        if (!userIdsCounter[profile.id]) {
+            sendMessage('chat__userDisconnected', {
+                id: profile.id,
+                nickname: profile.displayName,
+                avatar: getAvatar(profile),
+                link: profile.link
+            });
         }
     },
 
     'onChatMessage': function(socket, message) {
         message = html.strip(message);
-        log('User ' + onlineUsers[socket.conn.id].displayName + ' sent message: ' + message);
+        var profile = onlineUsers[socket.conn.id];
+        log('User ' + profile.displayName + ' sent message: ' + message);
         sendMessage('chat__message', {
-            nickname: onlineUsers[socket.conn.id].displayName,
-            avatar: getAvatar(onlineUsers[socket.conn.id]),
+            id: profile.id,
+            nickname: profile.displayName,
+            avatar: getAvatar(profile),
             message: message
         });
     },
 
     'onTyping': function(socket) {
-        socket.broadcast.emit('chat__typing', onlineUsers[socket.conn.id].displayName);
+        var profile = onlineUsers[socket.conn.id];
+        socket.broadcast.emit('chat__typing', {
+            id: profile.id,
+            nickname: profile.displayName
+        });
     },
 
     'onTypingEnd': function(socket) {
-        socket.broadcast.emit('chat__stoppedTyping', onlineUsers[socket.conn.id].displayName);
+        var profile = onlineUsers[socket.conn.id];
+        socket.broadcast.emit('chat__stoppedTyping', {
+            id: profile.id,
+            nickname: profile.displayName
+        });
     }
 };
 
@@ -111,14 +142,27 @@ module.exports = function(_io) {
             socket.on('chat__userStoppedTyping', _.partial(controller.onTypingEnd, socket));
         },
         registerUser: function(accessToken, profile, onReady) {
+            redis.set('reg_user_' + profile.id, JSON.stringify(profile));
+            redis.expire('reg_user_' + profile.id, 604800); // expire in week
             // onReady(null, user); -> ok
             // onReady(null, false); -> incorrect password?
             // onReady(err); -> exception occured
-            vkUsers[profile.id] = profile;
             onReady(null, profile);
         },
-        getUser: function(userId) {
-            return vkUsers[userId] || false;
+        getUser: function(userId, cb) {
+            redis.get('reg_user_' + userId, function(err, reply) {
+                try {
+                    var dbData = JSON.parse(reply);
+                    if (err) {
+                        throw new TypeError();
+                    }
+                } catch (e) {
+                    cb(false);
+                    return;
+                }
+
+                cb(dbData);
+            });
         }
     };
 };

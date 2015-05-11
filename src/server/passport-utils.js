@@ -33,7 +33,9 @@ module.exports = function(controller) {
     });
 
     passport.deserializeUser(function (userId, done) {
-        done(null, controller.getUser(userId));
+        controller.getUser(userId, function(data) {
+            done(null, data);
+        });
     });
 
     return passport;
