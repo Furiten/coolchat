@@ -11,9 +11,12 @@ module.exports = function(eventBus, registry) {
 
     eventBus.on('client__pageLoaded', initNotifications);
     eventBus.on('chat__message', function(message) {
-        if (registry.get('notifications.popup') == 'off') return;
-        if (registry.get('notifications.popup') == 'inactive_page' && pageActive) return;
-        if (!notificationsEnabled || notificationPermission != 'granted') return;
+        // Не показываем нотификации если:
+        if (registry.get('notifications.popup') == 'off') return; // выключено
+        if (registry.get('notifications.popup') == 'inactive_page' && pageActive) return; // включено только для неактивных страниц, а мы на активной
+        if (!notificationsEnabled || notificationPermission != 'granted') return; // отключено средствами браузера
+        if (message.id == registry.get('identity.id')) return; // свое сообщение
+        if (message.message.indexOf('@' + registry.get('identity.nickname')) == -1) return; // сообщение не содержит упоминания
 
         notify(message.nickname, message.avatar, message.message);
     });

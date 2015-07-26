@@ -4,6 +4,7 @@
  */
 
 var _ = require('lodash');
+var plural = require('../../../common/plural');
 
 module.exports = function(eventBus, registry) {
     var unreadInterval = null;
@@ -58,7 +59,7 @@ module.exports = function(eventBus, registry) {
                 if (title.attr('data-original') != title.html()) {
                     title.html(title.attr('data-original'));
                 } else {
-                    title.html(messagesCount + ' messages');
+                    title.html(messagesCount + plural.form(messagesCount, ' сообщение', ' сообщения', ' сообщений'));
                 }
             }, 2000);
         } else {

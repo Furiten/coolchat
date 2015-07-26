@@ -19,11 +19,32 @@ module.exports = function(eventBus, registry) {
 
     function initSound() {
         sound = document.createElement('audio');
-        sound.src = 'message.mp3';
+        sound.src = '/static/message.mp3';
         document.body.appendChild(sound);
     }
 
-    function playSound() {
+    function playSound(message) {
+        var highlighted = message.message.indexOf('@' + registry.get('identity.nickname')) != -1;
+        var setting = registry.get('notifications.sound');
+
+        // Не играем звук нотификации если:
+
+        // свое сообщение
+        if (message.id == registry.get('identity.id')) return;
+
+        // выключено
+        if (setting == 'off') return;
+
+        // включено только для неактивных страниц, а мы на активной
+        if (setting == 'inactive_page' && pageActive) return;
+
+        // включено только при упоминании для неактивных страниц, а мы на активной
+        if (setting == 'highlight_inactive_page' && (pageActive || !highlighted)) return;
+
+        // сообщение не содержит упоминания
+        if (setting == 'highlight' && !highlighted) return;
+
+
         var soundSetting = registry.get('notifications.sound');
         if (soundSetting == 'off') return;
         if (soundSetting == 'inactive_page' && pageActive) return;
