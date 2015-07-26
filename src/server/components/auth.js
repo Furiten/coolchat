@@ -1,9 +1,10 @@
 var _ = require('lodash');
-var redis = require('./redis');
+var redis = require('../redis');
 var uuid = require('node-uuid');
+var EventBus = require('../../common/eventBus');
 
-var AuthController = function() {};
-AuthController.prototype.authorizeUser = function(cookieValue, cb) {
+var AuthComponent = function() {};
+AuthComponent.prototype.authorizeUser = function(cookieValue, cb) {
     if (!cookieValue) {
         cb({reason: 'Unauthorized user'});
         return;
@@ -25,7 +26,7 @@ AuthController.prototype.authorizeUser = function(cookieValue, cb) {
     });
 };
 
-AuthController.prototype.saveUser = function(data) {
+AuthComponent.prototype.saveUser = function(data) {
     var cookie = this.generateCookie();
     redis.set('user_' + data.id, JSON.stringify({
         cookie: cookie,
@@ -35,7 +36,7 @@ AuthController.prototype.saveUser = function(data) {
     return data.id + '__' + cookie;
 };
 
-AuthController.prototype.logoutUser = function(cookieValue) {
+AuthComponent.prototype.logoutUser = function(cookieValue) {
     if (!cookieValue) return;
     var parts = cookieValue.split('__');
     redis.get('user_' + parts[0], function(err, reply) {
@@ -53,10 +54,28 @@ AuthController.prototype.logoutUser = function(cookieValue) {
 
 };
 
-AuthController.prototype.generateCookie = function() {
+AuthComponent.prototype.generateCookie = function() {
     return uuid.v4();
 };
 
-// export
-var authController = new AuthController();
-module.exports = authController;
+var auth = new AuthComponent();
+module.exports = auth;
+
+EventBus.handleReaction('auth:authorizeUser', function(data, cb) {
+    auth.authorizeUser(data.cookieValue, cb);
+});
+
+EventBus.handleReaction('auth:saveUser', function(data, cb) {
+    cb(auth.saveUser(data));
+});
+
+EventBus.handleReaction('auth:logoutUser', function(data, cb) {
+    auth.logoutUser(data.cookieValue);
+    cb();
+});
+
+EventBus.handleReaction('auth:generateCookie', function(data, cb) {
+    cb(auth.generateCookie());
+});
+
+

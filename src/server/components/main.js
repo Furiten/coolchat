@@ -1,7 +1,8 @@
 var _ = require('lodash');
-var log = require('./log');
-var html = require('../common/html.js');
-var redis = require('./redis');
+var log = require('../log');
+var html = require('../../common/html.js');
+var EventBus = require('../../common/eventBus');
+var redis = require('../redis');
 var io;
 
 var onlineUsers = {};
@@ -137,7 +138,7 @@ var controller = {
 
 module.exports = function(_io) {
     io = _io;
-    return {
+    var methods = {
         addSocket: function(socket) {
             console.log('----------');
             controller.onConnect(socket);
@@ -171,4 +172,19 @@ module.exports = function(_io) {
             });
         }
     };
+
+    EventBus.handleReaction('main:addSocket', function(data, cb) {
+        methods.addSocket(data.socket);
+        cb();
+    });
+
+    EventBus.handleReaction('main:registerUser', function(data, cb) {
+        methods.registerUser(data.accessToken, data.profile, cb);
+    });
+
+    EventBus.handleReaction('main:getUser', function(data, cb) {
+        methods.getUser(data.userId, cb);
+    });
+
+    return methods;
 };

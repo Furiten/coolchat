@@ -7,14 +7,19 @@ var VKONTAKTE_APP_SECRET = "tRm4vKRx8gdWio75Cg1t";
 var GOOGLE_CLIENT_ID = '329753295705-tllhaeiffhnjhl2bt6588bh2n9mrof3p.apps.googleusercontent.com';
 var GOOGLE_CLIENT_SECRET = 'FudPQ453Of5L2t7yjB3YAXIa';
 
-module.exports = function(controller) {
+var EventBus = require('../../common/eventBus');
+
+module.exports = function() {
     passport.use(new VKontakteStrategy({
             clientID: VKONTAKTE_APP_ID,
             clientSecret: VKONTAKTE_APP_SECRET,
             callbackURL: "http://localhost:3000/auth/vkontakte/callback"
         },
         function (accessToken, refreshToken, profile, done) {
-            controller.registerUser(accessToken, profile, done);
+            EventBus.requestReaction('main:registerUser', {
+                accessToken: accessToken,
+                profile: profile
+            }, done);
         }
     ));
 
@@ -24,7 +29,10 @@ module.exports = function(controller) {
             callbackURL: "http://localhost:3000/auth/google/callback"
         },
         function(accessToken, refreshToken, profile, done) {
-            controller.registerUser(accessToken, profile, done);
+            EventBus.requestReaction('main:registerUser', {
+                accessToken: accessToken,
+                profile: profile
+            }, done);
         }
     ));
 
@@ -33,8 +41,10 @@ module.exports = function(controller) {
     });
 
     passport.deserializeUser(function (userId, done) {
-        controller.getUser(userId, function(data) {
-            done(null, data);
+        EventBus.requestReaction('main:getUser', {
+            userId: userId
+        }, function(reply) {
+            done(null, reply);
         });
     });
 
