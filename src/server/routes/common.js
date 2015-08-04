@@ -2,6 +2,9 @@ var EventBus = require('../../common/eventBus');
 var versions = require('../../common/version-config');
 var path = require('path');
 
+/**
+ * Common app routes: primary entry point & logout entry point
+ */
 module.exports = function(app) {
     function setAuthCookie(res, cookie, del) {
         res.cookie(versions.authCookieName, cookie, {

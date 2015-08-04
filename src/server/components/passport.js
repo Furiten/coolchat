@@ -9,6 +9,12 @@ var GOOGLE_CLIENT_SECRET = 'FudPQ453Of5L2t7yjB3YAXIa';
 
 var EventBus = require('../../common/eventBus');
 
+/**
+ * Passport middlewares:
+ * Not exactly a component, but a wrapper to instantiate passport.js
+ * then pass strategies in, and also define actions on user serialization
+ * and deserialization to/from session db
+ */
 module.exports = function() {
     passport.use(new VKontakteStrategy({
             clientID: VKONTAKTE_APP_ID,

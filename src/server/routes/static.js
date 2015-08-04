@@ -1,6 +1,10 @@
 var _ = require('lodash');
 var path = require('path');
 
+/**
+ * Routes
+ * Custom paths to provide client app with static files (js, css, etc)
+ */
 module.exports = function(app) {
     // Custom paths
     var servedFiles = {

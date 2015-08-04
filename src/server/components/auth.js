@@ -2,8 +2,17 @@ var _ = require('lodash');
 var redis = require('../redis');
 var uuid = require('node-uuid');
 var EventBus = require('../../common/eventBus');
-
+/**
+ * Authorization component
+ * Works with redis to store user in local storage.
+ */
 var AuthComponent = function() {};
+
+/**
+ * When cookie exists, use that cookie to retrieve user info.
+ * In this case, user is considered authorized and all needed actions are performed
+ * (such as sending message to common chat, adding to user list, etc)
+ */
 AuthComponent.prototype.authorizeUser = function(cookieValue, cb) {
     if (!cookieValue) {
         cb({reason: 'Unauthorized user'});
@@ -26,6 +35,11 @@ AuthComponent.prototype.authorizeUser = function(cookieValue, cb) {
     });
 };
 
+/**
+ * Save user credentials to session db when
+ * user logs out using remote provider. No existing data entries
+ * are taken into consideration.
+ */
 AuthComponent.prototype.saveUser = function(data) {
     var cookie = this.generateCookie();
     redis.set('user_' + data.id, JSON.stringify({
@@ -36,6 +50,9 @@ AuthComponent.prototype.saveUser = function(data) {
     return data.id + '__' + cookie;
 };
 
+/**
+ * Remove active user from session db
+ */
 AuthComponent.prototype.logoutUser = function(cookieValue) {
     if (!cookieValue) return;
     var parts = cookieValue.split('__');

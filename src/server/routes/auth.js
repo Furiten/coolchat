@@ -1,10 +1,18 @@
 var _ = require('lodash');
 var versions = require('../../common/version-config');
 var EventBus = require('../../common/eventBus');
-
+/**
+ * Routes
+ * Authorization routes of 2 types:
+ * - Initial routes for passport.js entry points
+ * - Final callback entry points to be called from remote auth provider
+ */
 module.exports = function(app, passport) {
+    // Initial
     app.get('/auth/vkontakte', passport.authenticate('vkontakte', { failureRedirect: '/failedToEnter/' }));
     app.get('/auth/google', passport.authenticate('google', {scope: 'https://www.googleapis.com/auth/plus.login'}));
+
+    // Callbacks
 
     app.get('/auth/vkontakte/callback',
         passport.authenticate('vkontakte', { failureRedirect: '/failedToEnter/' }),

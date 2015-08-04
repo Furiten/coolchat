@@ -9,7 +9,10 @@ var sessionStore = new RedisStore({
 });
 var passportSocketIo = require("passport.socketio");
 var cookieParser = require('cookie-parser');
-
+/**
+ * Express.js middlewares require list.
+ * Don't modify anything here.
+ */
 module.exports = function(app, io, passport) {
     app.use(cookieParser());
     app.use(express.static('public'));
