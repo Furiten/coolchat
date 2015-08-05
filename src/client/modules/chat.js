@@ -6,6 +6,7 @@ var $ = require('jquery');
 window.$ = window.jQuery = $;
 var _ = require('lodash');
 var bindRemoteEvents = require('./api/remoteEvents');
+var multiwindows = require('./api/multiwindows');
 var eventBus = require('../../common/eventBus');
 var Registry = require('../../common/registry');
 var registry = new Registry();
@@ -27,7 +28,9 @@ function initModules() {
     });
 }
 
-$(function() {
+function masterWindow() {
+    console.info('Starting as master window');
+
     $('body').append(require('../templates/chat.hbs'));
     bindRemoteEvents(); // bind common socket.io and eventBus events
     initModules();
@@ -48,4 +51,13 @@ $(function() {
     eventBus.on('chat__logoutButtonClicked', function() {
         location.href = '/logout';
     });
+}
+
+function slaveWindow() {
+    console.info('Starting as slave window');
+}
+
+// Main entry point
+$(function() {
+    multiwindows.status(_.once(masterWindow), _.once(slaveWindow));
 });
