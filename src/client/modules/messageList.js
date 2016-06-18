@@ -10,8 +10,8 @@ module.exports = function(eventBus, registry) {
         chatField = $('.field_chat');
     });
 
-    eventBus.on('chat__userCame', userLoggedIn);
-    eventBus.on('chat__userDisconnected', userWentAway);
+    //eventBus.on('chat__userCame', userLoggedIn);
+    //eventBus.on('chat__userDisconnected', userWentAway);
     eventBus.on('chat__message', userMessage);
     eventBus.on('chat__previousMessages', showPrevMessages);
     eventBus.on('chat__userlistAppeared', function() {
@@ -78,10 +78,10 @@ module.exports = function(eventBus, registry) {
                     userMessage(msg);
                     break;
                 case 'chat__userDisconnected':
-                    userWentAway(msg);
+                    //userWentAway(msg);
                     break;
                 case 'chat__userCame':
-                    userLoggedIn(msg);
+                    //userLoggedIn(msg);
                     break;
                 default:
             }

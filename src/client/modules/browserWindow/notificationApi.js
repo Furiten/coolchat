@@ -9,7 +9,7 @@ module.exports = function(eventBus, registry) {
     var notificationPermission = 'denied';
     var pageActive = true;
 
-    eventBus.on('client__pageLoaded', initNotifications);
+    //eventBus.on('client__pageLoaded', initNotifications);
     eventBus.on('chat__message', function(message) {
         // Не показываем нотификации если:
         if (registry.get('notifications.popup') == 'off') return; // выключено
@@ -18,7 +18,7 @@ module.exports = function(eventBus, registry) {
         if (message.id == registry.get('identity.id')) return; // свое сообщение
         if (message.message.indexOf('@' + registry.get('identity.nickname')) == -1) return; // сообщение не содержит упоминания
 
-        notify(message.nickname, message.avatar, message.message);
+        //notify(message.nickname, message.avatar, message.message);
     });
     eventBus.on('client__windowBlurred', function() {
         pageActive = false;

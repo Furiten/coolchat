@@ -8,8 +8,8 @@ module.exports = function(eventBus, registry) {
     var sound,
         pageActive = true;
 
-    eventBus.on('client__pageLoaded', initSound);
-    eventBus.on('chat__message', playSound);
+    //eventBus.on('client__pageLoaded', initSound);
+    //eventBus.on('chat__message', playSound);
     eventBus.on('client__windowBlurred', function() {
         pageActive = false;
     });

@@ -19,7 +19,7 @@ module.exports = function() {
     passport.use(new VKontakteStrategy({
             clientID: VKONTAKTE_APP_ID,
             clientSecret: VKONTAKTE_APP_SECRET,
-            callbackURL: "http://localhost:3000/auth/vkontakte/callback"
+            callbackURL: "http://talk.furiten.ru/auth/vkontakte/callback"
         },
         function (accessToken, refreshToken, profile, done) {
             EventBus.requestReaction('main:registerUser', {
@@ -32,7 +32,7 @@ module.exports = function() {
     passport.use(new GoogleStrategy({
             clientID: GOOGLE_CLIENT_ID,
             clientSecret: GOOGLE_CLIENT_SECRET,
-            callbackURL: "http://localhost:3000/auth/google/callback"
+            callbackURL: "http://talk.furiten.ru/auth/google/callback"
         },
         function(accessToken, refreshToken, profile, done) {
             EventBus.requestReaction('main:registerUser', {

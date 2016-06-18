@@ -1,15 +1,19 @@
 var _ = require('lodash');
-var log = require('../log');
 var html = require('../../common/html.js');
 var EventBus = require('../../common/eventBus');
 var redis = require('../redis');
-var io;
+var io, logger = {};
+var log = require('../log')(logger);
 
 var onlineUsers = {};
 var vkUsers = {};
 var lastMessages = [];
 var MAX_LAST_MSGS = 10;
 var userIdsCounter = {}; // для чуваков, которые сидят с нескольких вкладок с одного аккаунта
+
+var banned = {
+    'asshole': true
+};
 
 function addMessageToLast(eventType, data) {
     if (_.where(lastMessages, {event: 'chat__message'}).length >= MAX_LAST_MSGS) {
@@ -110,7 +114,10 @@ var controller = {
     'onChatMessage': function(socket, message) {
         message = html.strip(message);
         var profile = onlineUsers[socket.conn.id];
-        log('User ' + profile.displayName + ' sent message: ' + message);
+        log('User ' + profile.displayName + ' (id# ' + profile.id + ') sent message: ' + message);
+        if (banned[profile.id]) {
+            return;
+        }
         sendMessage('chat__message', {
             id: profile.id,
             nickname: profile.displayName,
@@ -136,8 +143,9 @@ var controller = {
     }
 };
 
-module.exports = function(_io) {
+module.exports = function(_io, _logger) {
     io = _io;
+    logger.varlog = _logger;
     var methods = {
         addSocket: function(socket) {
             console.log('----------');

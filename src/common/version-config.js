@@ -1,5 +1,5 @@
 module.exports = {
-    'projectDomain': 'localhost:3000',
-    'cookieDomain': 'localhost:3000',
-    'authCookieName': '_coolchat-auth-v0.1'
+    'projectDomain': 'talk.furiten.ru',
+    'cookieDomain': 'talk.furiten.ru',
+    'authCookieName': '_talk-auth-v0.3'
 };

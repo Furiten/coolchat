@@ -40,7 +40,7 @@ var webpackDevConfig = {
 };
 
 var webpackReleaseConfig = {
-    entry: './src/client/modules/chat.js',
+    entry: './client/modules/chat.js',
     context: __dirname + '/src',
 
     output: {
@@ -51,7 +51,20 @@ var webpackReleaseConfig = {
     plugins: [
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.UglifyJsPlugin()
-    ]
+    ],
+    
+    module: {
+        loaders: [
+            {
+                test: /\.hbs/,
+                loader: 'handlebars-loader'
+            },
+            {
+                test: /\.(eot|woff|ttf|svg|png|jpg)$/,
+                loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'
+            }
+        ]
+    }
 };
 
 gulp.task('dev', ['server'], function(callback) {
