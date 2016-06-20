@@ -19,6 +19,7 @@ var EventBus = require('./common/eventBus');
 var main = require('./server/components/main')(io, logger);
 var passport = require('./server/components/passport')(); // Special component: returns passport.js instance
 var auth = require('./server/components/auth');
+var tournaments = require('./server/components/tournaments');
 
 require('./server/middlewares')(app, io, passport); // Exec middlewares for express and socket.io
 require('./server/routes/auth')(app, passport);

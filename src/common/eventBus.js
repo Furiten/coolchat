@@ -45,8 +45,8 @@ EventBus.requestReaction = function(eventType, data, cb) {
         console.error('Event ' + eventType + ' did not receive requested reaction in ' + REACT_TIMEOUT + 'ms');
     }, REACT_TIMEOUT);
 
-    this.on('!' + eventType, handler);
-    this.emit('?' + eventType, data);
+    this.on('!' + eventType, handler); // setting handler for reply
+    this.emit('?' + eventType, data); // making a question :)
     
     return {
         done: function() {

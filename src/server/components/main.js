@@ -118,6 +118,7 @@ var controller = {
         if (banned[profile.id]) {
             return;
         }
+        EventBus.requestReaction('tournaments:tryParseMessage', {message: message});
         sendMessage('chat__message', {
             id: profile.id,
             nickname: profile.displayName,
@@ -192,6 +193,11 @@ module.exports = function(_io, _logger) {
 
     EventBus.handleReaction('main:getUser', function(data, cb) {
         methods.getUser(data.userId, cb);
+    });
+
+    EventBus.handleReaction('main:postMessage', function(data, cb) {
+        sendMessage('chat__message', data);
+        cb();
     });
 
     return methods;

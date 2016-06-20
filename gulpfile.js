@@ -52,7 +52,7 @@ var webpackReleaseConfig = {
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.UglifyJsPlugin()
     ],
-    
+
     module: {
         loaders: [
             {
