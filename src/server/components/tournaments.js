@@ -13,6 +13,10 @@ var TournamentsComponent = function() {
         self.processStateChanged(newState);
     });
 
+    this.fsm.onTableStartAttempt(function(status) {
+        self.onTableStartAttempt(status);
+    });
+
     EventBus.handleReaction('tournaments:tryParseMessage', function(data, cb) {
         self.parseMessage(data.message, cb);
     });
