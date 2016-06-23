@@ -109,6 +109,7 @@ module.exports = function () {
             }
 
             Promise.all(tables).then(function () {
+                tableStartCb(null, null, {success: true, allTablesStarted: true});
                 cb(null, Object.assign(state, {
                     stage: stages.GAMES_STARTED
                 }));
@@ -131,7 +132,7 @@ module.exports = function () {
                     return;
                 }
 
-                if (payload.onSuccess) payload.onSuccess(result); // TODO
+                if (payload.onSuccess) payload.onSuccess(result);
 
                 var finishedCount = state.gamesFinished + 1;
                 if (finishedCount >= state.currentSeating.length) { // all games finished
@@ -144,6 +145,7 @@ module.exports = function () {
                     cb(null, Object.assign(state, {
                         totalPlayedGames: state.totalPlayedGames + 1,
                         stage: stages.COFFEEBREAK,
+                        breakTime: (state.totalPlayedGames == 4 ? coffebreakIntervals.BIG : coffebreakIntervals.SMALL),
                         coffeebreakStartedAt: (new Date()).getTime(),
                         coffeebreakTimer: itr,
                         gamesFinished: 0
@@ -185,7 +187,7 @@ module.exports = function () {
                     return;
                 }
 
-                if (payload.onSuccess) payload.onSuccess(result); // TODO
+                if (payload.onSuccess) payload.onSuccess(result);
 
                 cb(null, Object.assign(state, {
                     stage: stages.TOURN_FINISHED
@@ -290,12 +292,12 @@ module.exports = function () {
             function attempt() {
                 makePost(url, data)
                     .then(function () {
-                        tableStartCb(null, data, {success: true});
+                        tableStartCb(null, playersList, {success: true});
                         resolve();
                     })
                     .catch(function (resp) {
                         if (attemptsCount < maxAttempts) { // legal attempts for slowpoke users
-                            tableStartCb(resp.absentUsers, data, {success: false, reattempting: true});
+                            tableStartCb(resp.absentUsers, playersList, {success: false, reattempting: true});
                             setTimeout(attempt, 30000); // re-attempt in 30 secs
                         } else { // wooh, something went really wrong! trying to recover
                             if (resp.absentUsers.length == 4) { // not likely to happen

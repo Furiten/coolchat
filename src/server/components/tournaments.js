@@ -1,6 +1,16 @@
 var _ = require('lodash');
 var redis = require('../redis');
 var EventBus = require('../../common/eventBus');
+require('../../common/base64');
+
+function sendBotMessage(msg) {
+    EventBus.requestReaction('main:postMessage', {
+        id: -1,
+        nickname: 'Pankrat the dragon',
+        avatar: '/static/avatars/pankrat.png',
+        message: msg
+    });
+}
 
 /**
  * Tournaments component
@@ -49,25 +59,107 @@ TournamentsComponent.prototype.processStateChanged = function(newState) {
     if (!this._inited) return;
     this._storeState(newState); // обязательно!
 
-    // TODO: тут мы понимаем, что в fsm что-то случилось и можем послать некое сообщение в чат
+    if (newState.stage == this.fsm.stages.SEATING_STARTED) {
+        sendBotMessage('Внимание! Рассадка сгенерирована, начинаем игры!');
+        return;
+    }
 
-    EventBus.requestReaction('main:postMessage', {
-        id: -1,
-        nickname: 'Tournament bot',
-        avatar: '/static/avatars/robot.jpg',
-        message: 'WOOOOHOOOOO!!' // TODO - вот так мы можем говорить от бота
-    })
+    if (newState.stage == this.fsm.stages.COFFEEBREAK) {
+        sendBotMessage('Итак, закончена игра №' + (newState.totalPlayedGames + 1) + '. ' +
+            'Объявляется перерыв длиной в ' + (newState.breakTime / (1000 * 60)) + ' минут. ' +
+            'Просьба НЕ ВЫХОДИТЬ ИЗ ЛОББИ на время перерыва. В случае, если в течение 5 минут после момента начала игр ' +
+            'вас не будет в лобби, вместо вас будет играть бот.'
+        );
+        return;
+    }
+
+    if (newState.stage == this.fsm.stages.FINAL_SEATING_STARTED) {
+        sendBotMessage('Внимание! Начинается финальная игра!');
+        return;
+    }
+
+    if (newState.stage == this.fsm.stages.TOURN_FINISHED) {
+        sendBotMessage('Финальная игра завершена и внесена! Турнир окончен! Спасибо, что были с нами! :) Приходите на наши следующие турниры :)');
+        return;
+    }
+
+    if (newState.stage == this.fsm.stages.TOURN_PAUSED) {
+        sendBotMessage('Внимание! Турнир ПРИОСТАНОВЛЕН до вмешательства руководителей турнира. Начатые игры НЕ БУДУТ ПРИНЯТЫ в рейтинг турнира.');
+    }
+};
+
+TournamentsComponent.prototype.onTableStartAttempt = function(absentUsers, tableStarted, status) {
+    if (!this._inited) return;
+
+    if (status.success) {
+        sendBotMessage('Стол [ ' + tableStarted.join(', ') + ' ] начал игру!');
+
+        if (status.allTablesStarted) {
+            sendBotMessage('Все столы начали игру! Всем успешной игры! :)');
+        }
+        return;
+    }
+
+    // all next means that success = false
+    if (status.reattempting) {
+        sendBotMessage('Не удалось начать игру стола [ ' + tableStarted.join(', ') +
+            ' ]! Следующие игроки отсутствуют в лобби: ' + absentUsers.join(', ') + '. ' +
+            'Повторная попытка старта игры через 30 секунд. Пожалуйста, пройдите в турнирное лобби!');
+        return;
+    }
+
+    // reattempting = false
+    if (!status.tournamentPaused) {
+        sendBotMessage('Внимание! В течение 5 минут следующие игроки не появились в лобби: ' + absentUsers.join(', ') + '. ' +
+            'В текущей игре вместо указанных игроков будут играть боты.');
+        return;
+    }
+
+    sendBotMessage('Внимание! Количество замен игроков по причине отсутствия в лобби превысило все возможные пределы. Приостаналиваем турнир...');
 };
 
 TournamentsComponent.prototype.parseMessage = function(message, cb) {
     if (!this._inited) return;
 
-    // TODO: тут мы можем парсить команды из чата и давать команды в fsm соответственно
+    if (message.indexOf('!pause!')) {
+        this.fsm.dispatch({type: 'PAUSE_TOURNAMENT'}, function() {});
+        cb(true);
+        return;
+    }
 
-    // Когда даем в fsm экшн с payload-ом для регистрации игры, можно в пайлоаде передать
-    // колбэк onSuccess, чтобы вывести результаты в чат например.
+    if (message.indexOf('!resume!')) {
+        this.fsm.dispatch({type: 'RESUME_TOURNAMENT'}, function() {});
+        sendBotMessage('Турнир ВОЗОБНОВЛЕН!');
+        cb(true);
+        return;
+    }
 
-    var state = this.fsm.getState(); // так доступно состояние fsm
+    if (message.indexOf('http://tenhou.net')) { // simple check
+        var matches = message.match(/http:\/\/tenhou.net\/0\/\?log=[-a-z0-9]{28,29}/g);
+        var self = this;
+        matches.forEach(function(match) {
+            self.fsm.dispatch({type: 'GAME_ENDED', payload: {
+                link: match,
+                onSuccess: function(result) {
+                    var scoresWithUma = result.scores;
+
+                    var results = [];
+                    for (var user in scoresWithUma) {
+                        results.push(Base64.decode(user) + ' (' + scoresWithUma[user] + ')');
+                    }
+
+                    sendBotMessage('Игра успешно зарегистрирована! Итоги игры: ' + results.join(', '));
+                }
+            }}, function(e) {
+                if (e) {
+                    sendBotMessage('При попытке регистрации игры что-то пошло не так, и вот что именно: ' + e.message);
+                }
+            });
+        });
+
+    }
+
+    cb(false); // or true to block message
 };
 
 var tournaments = new TournamentsComponent();

@@ -118,12 +118,15 @@ var controller = {
         if (banned[profile.id]) {
             return;
         }
-        EventBus.requestReaction('tournaments:tryParseMessage', {message: message});
-        sendMessage('chat__message', {
-            id: profile.id,
-            nickname: profile.displayName,
-            avatar: getAvatar(profile),
-            message: message
+        EventBus.requestReaction('tournaments:tryParseMessage', {message: message}, function(blockMessageShow) {
+            if (!blockMessageShow) {
+                sendMessage('chat__message', {
+                    id: profile.id,
+                    nickname: profile.displayName,
+                    avatar: getAvatar(profile),
+                    message: message
+                });
+            }
         });
     },
 
