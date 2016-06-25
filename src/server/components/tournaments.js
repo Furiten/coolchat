@@ -1,7 +1,8 @@
 var _ = require('lodash');
+var Base64 = require('../../common/base64');
 var redis = require('../redis');
 var EventBus = require('../../common/eventBus');
-require('../../common/base64');
+var Fsm = require('./tournamentsFsm');
 
 function sendBotMessage(msg) {
     EventBus.requestReaction('main:postMessage', {
@@ -18,14 +19,12 @@ function sendBotMessage(msg) {
 var TournamentsComponent = function() {
     var self = this;
     this._inited = false;
-    this.fsm = require('./tournamentsFsm');
+    this.fsm = Fsm();
     this.fsm.onStateChanged(function(newState) {
         self.processStateChanged(newState);
     });
 
-    this.fsm.onTableStartAttempt(function(status) {
-        self.onTableStartAttempt(status);
-    });
+    this.fsm.onTableStartAttempt(_.bind(this.onTableStartAttempt, this));
 
     EventBus.handleReaction('tournaments:tryParseMessage', function(data, cb) {
         self.parseMessage(data.message, cb);
@@ -48,6 +47,8 @@ var TournamentsComponent = function() {
 };
 
 TournamentsComponent.prototype._storeState = function(newState) {
+    console.log('==== New tournament state ====');
+    console.log(newState);
     var serializedState = JSON.stringify(newState);
     redis.set('tourn_state', serializedState);
 };
@@ -58,6 +59,12 @@ TournamentsComponent.prototype._storeState = function(newState) {
 TournamentsComponent.prototype.processStateChanged = function(newState) {
     if (!this._inited) return;
     this._storeState(newState); // обязательно!
+
+    if (newState.stage == this.fsm.stages.SORTITION_READY) {
+        this.fsm.dispatch({'type': 'START_SEATING'}, function() {});
+        sendBotMessage('Начинаем рассадку! Приготовились! Поехали!');
+        return;
+    }
 
     if (newState.stage == this.fsm.stages.SEATING_STARTED) {
         sendBotMessage('Внимание! Рассадка сгенерирована, начинаем игры!');
@@ -89,13 +96,18 @@ TournamentsComponent.prototype.processStateChanged = function(newState) {
 };
 
 TournamentsComponent.prototype.onTableStartAttempt = function(absentUsers, tableStarted, status) {
+    console.log('Table start logs:', status, absentUsers, tableStarted);
     if (!this._inited) return;
 
     if (status.success) {
-        sendBotMessage('Стол [ ' + tableStarted.join(', ') + ' ] начал игру!');
+        if (tableStarted) {
+            sendBotMessage('Стол [ ' + tableStarted.map(function (el) {
+                    return el ? Base64.decode(el.username) : '';
+                }).join(', ') + ' ] начал игру!');
+        }
 
         if (status.allTablesStarted) {
-            sendBotMessage('Все столы начали игру! Всем успешной игры! :)');
+            sendBotMessage('Все столы начали игру! Всем успешной игры! :) Рекомендуем закрыть чат на время игры, чтобы не отвлекаться по пустякам.');
         }
         return;
     }
@@ -121,21 +133,35 @@ TournamentsComponent.prototype.onTableStartAttempt = function(absentUsers, table
 TournamentsComponent.prototype.parseMessage = function(message, cb) {
     if (!this._inited) return;
 
-    if (message.indexOf('!pause!')) {
+    if (message.indexOf('!start!') != -1) {
+        this.fsm.dispatch({type: 'START_TOURNAMENT'}, function() {});
+        sendBotMessage('Июньский онлайн-турнир начинается! Добро пожаловать всем игрокам и просьба зайти в лобби, если вы этого еще не сделали.');
+        cb(true);
+        return;
+    }
+
+    if (message.indexOf('!pause!') != -1) {
         this.fsm.dispatch({type: 'PAUSE_TOURNAMENT'}, function() {});
         cb(true);
         return;
     }
 
-    if (message.indexOf('!resume!')) {
+    if (message.indexOf('!reset!!!') != -1) {
+        sendBotMessage('Внимание! Данные турнира были сброшены!');
+        this.fsm.dispatch({type: 'RESET_TOURNAMENT'}, function() {});
+        cb(true);
+        return;
+    }
+
+    if (message.indexOf('!resume!') != -1) {
         this.fsm.dispatch({type: 'RESUME_TOURNAMENT'}, function() {});
         sendBotMessage('Турнир ВОЗОБНОВЛЕН!');
         cb(true);
         return;
     }
 
-    if (message.indexOf('http://tenhou.net')) { // simple check
-        var matches = message.match(/http:\/\/tenhou.net\/0\/\?log=[-a-z0-9]{28,29}/g);
+    if (message.indexOf('http://tenhou.net') != -1) { // simple check
+        var matches = message.match(/http:\/\/tenhou.net\/0\/\?log=[-a-z0-9]+/g);
         var self = this;
         matches.forEach(function(match) {
             self.fsm.dispatch({type: 'GAME_ENDED', payload: {

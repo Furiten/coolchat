@@ -1,4 +1,5 @@
 var http = require('http');
+var Base64 = require('../../common/base64');
 var PRIVATE_KEY = '2366211612778221';
 var STAT_HOST = 'online-june2016.furiten.ru';
 
@@ -21,6 +22,7 @@ function makePost(path, data) {
             }
         };
 
+        console.log('Requesting ' + path + ' with ' + JSON.stringify(data));
         var req = http.request(options, function (res) {
             res.setEncoding('utf8');
             var out = '';
@@ -29,6 +31,7 @@ function makePost(path, data) {
             });
             res.on('end', function () {
                 var resp = JSON.parse(out);
+                console.log('Server responded: ', resp);
                 if (resp.code == 200) {
                     resolve(resp.data);
                 } else {
@@ -38,6 +41,7 @@ function makePost(path, data) {
         });
 
         req.on('error', function (e) {
+            console.log('Server errored: ', e);
             reject(e.message);
         });
 
@@ -83,13 +87,28 @@ module.exports = function () {
     };
 
     var actions = {
+        'RESET_TOURNAMENT': function(state, payload, cb) {
+            cb(null, {
+                'stage': stages.TOURN_NOT_STARTED,
+                'gamesFinished': 0,
+                'totalPlayedGames': 0,
+                'coffeebreakStartAt': null,
+                'currentSeating': null
+            });
+        },
+
         'START_TOURNAMENT': function (state, payload, cb) {
             if (state.stage != stages.TOURN_NOT_STARTED) {
                 cb({message: 'Tournament already started'});
                 return;
             }
 
-            makeSortition(function (sortition) {
+            makeSortition(function (e, sortition) {
+                if (e) {
+                    cb(e);
+                    return;
+                }
+
                 cb(null, Object.assign(state, {
                     stage: stages.SORTITION_READY,
                     currentSeating: sortition
@@ -103,21 +122,30 @@ module.exports = function () {
                 return;
             }
 
-            var tables = [];
-            for (var i = 0; i < state.currentSeating.length; i++) {
-                tables.push(startSingleTable(state.currentSeating[i]));
-            }
+            function start(idx) { // serial table start function, delays by 2sec
+                if (idx >= state.currentSeating.length) { // all done
+                    tableStartCb(null, null, {success: true, allTablesStarted: true});
+                    cb(null, Object.assign(state, {
+                        stage: stages.GAMES_STARTED
+                    }));
+                    return;
+                }
 
-            Promise.all(tables).then(function () {
-                tableStartCb(null, null, {success: true, allTablesStarted: true});
-                cb(null, Object.assign(state, {
-                    stage: stages.GAMES_STARTED
-                }));
-            });
+                startSingleTable(state.currentSeating[idx]).then(function() {
+                    console.log('Table #' + idx + ' started successfully');
+                    setTimeout(function() {
+                        start(idx+1);
+                    }, 2000);
+                }).catch(function(e) {
+                    console.log('Starting table failed: ', e);
+                });
+            }
 
             cb(null, Object.assign(state, {
                 stage: stages.SEATING_STARTED
             }));
+
+            start(0);
         },
 
         'GAME_ENDED': function (state, payload, cb) {
@@ -128,7 +156,7 @@ module.exports = function () {
 
             registerGame(payload.link, function (e, result) {
                 if (e) {
-                    cb({message: 'Couldn\'t add game :( Wrong link? Try again.'});
+                    cb(e);
                     return;
                 }
 
@@ -278,10 +306,10 @@ module.exports = function () {
         }
 
         var data = {
-            player1: fixedEncodeURIComponent(playersList[0]),
-            player2: fixedEncodeURIComponent(playersList[1]),
-            player3: fixedEncodeURIComponent(playersList[2]),
-            player4: fixedEncodeURIComponent(playersList[3]),
+            player1: fixedEncodeURIComponent(Base64.decode(playersList[0]['username'])),
+            player2: fixedEncodeURIComponent(Base64.decode(playersList[1]['username'])),
+            player3: fixedEncodeURIComponent(Base64.decode(playersList[2]['username'])),
+            player4: fixedEncodeURIComponent(Base64.decode(playersList[3]['username'])),
             lobby_private_key: PRIVATE_KEY
         };
 
@@ -308,21 +336,21 @@ module.exports = function () {
                             // Заменяем опоздунов на ботов!
                             // Обязательно предупредить людей, чтобы они не уходили из лобби во избежание такой ситуации.
                             var liveUsers = playersList.filter(function(n) {
-                                return resp.absentUsers.indexOf(n) == -1;
+                                return resp.absentUsers.indexOf(n.username) == -1;
                             });
                             for (var i in reservedBots) {
                                 if (reservedBots[i] == false && liveUsers.length < 4) {
-                                    liveUsers.push(reservedBots[i]);
+                                    liveUsers.push({username: Base64.encode(reservedBots[i])});
                                     reservedBots[i] = true;
                                 }
                             }
 
                             if (liveUsers.length == 4) { // fine, lets play with bots
                                 data = {
-                                    player1: fixedEncodeURIComponent(liveUsers[0]),
-                                    player2: fixedEncodeURIComponent(liveUsers[1]),
-                                    player3: fixedEncodeURIComponent(liveUsers[2]),
-                                    player4: fixedEncodeURIComponent(liveUsers[3]),
+                                    player1: fixedEncodeURIComponent(Base64.decode(liveUsers[0]['username'])),
+                                    player2: fixedEncodeURIComponent(Base64.decode(liveUsers[1]['username'])),
+                                    player3: fixedEncodeURIComponent(Base64.decode(liveUsers[2]['username'])),
+                                    player4: fixedEncodeURIComponent(Base64.decode(liveUsers[3]['username'])),
                                     lobby_private_key: PRIVATE_KEY
                                 };
                                 setTimeout(attempt, 1000);
@@ -393,7 +421,9 @@ module.exports = function () {
 
 
     function dispatch(action, cb) {
+        console.log('Dispatching action to fsm: ', action);
         actions[action.type](state, action.payload, function (e, result) {
+            console.log('Reply came for action: ', action, e);
             if (e) {
                 return cb(e);
             }
