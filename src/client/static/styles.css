@@ -45,14 +45,20 @@
     font-size: 0.8em;
     height: 1.6em;
     padding-left: 2em;
-    border-top: 3px solid #ccc;
+    border-top: 1px solid #ccc;
     color: #bbb;
+    border-radius: 0px;
+}
+
+.field_message {
+    padding: 10px;
+    border-radius: 0;
 }
 
 .chat_message {
     position: relative;
     margin: 0;
-    padding: 1em 0 0 1em;
+    padding: 1.5em 0 0 1em;
     line-height: 1.5em;
 }
 
@@ -83,7 +89,6 @@
 }
 
 .message_content {
-    border-top: 1px solid #999;
     line-height: 1.5em;
 }
 
