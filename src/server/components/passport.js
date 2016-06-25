@@ -4,8 +4,8 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var VKONTAKTE_APP_ID = 4748780;
 var VKONTAKTE_APP_SECRET = "tRm4vKRx8gdWio75Cg1t";
 
-var GOOGLE_CLIENT_ID = '329753295705-tllhaeiffhnjhl2bt6588bh2n9mrof3p.apps.googleusercontent.com';
-var GOOGLE_CLIENT_SECRET = 'FudPQ453Of5L2t7yjB3YAXIa';
+var GOOGLE_CLIENT_ID = '329753295705-0v9lktlhcm8820as3bfu02dafi73uov1.apps.googleusercontent.com';
+var GOOGLE_CLIENT_SECRET = 'puxrh25JM3wUVmXLwz1_bnAn';
 
 var EventBus = require('../../common/eventBus');
 

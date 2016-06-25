@@ -1,6 +1,8 @@
 var http = require('http');
+var Base64 = require('../../common/base64');
 var PRIVATE_KEY = '2366211612778221';
 var STAT_HOST = 'online-june2016.furiten.ru';
+var TOURN_GAMES_COUNT = 8;
 
 var reservedBots = {
     'Alfa-Tom': false, // true if bot is busy now
@@ -21,6 +23,7 @@ function makePost(path, data) {
             }
         };
 
+        console.log('Requesting ' + path + ' with ' + JSON.stringify(data));
         var req = http.request(options, function (res) {
             res.setEncoding('utf8');
             var out = '';
@@ -28,16 +31,23 @@ function makePost(path, data) {
                 out += body;
             });
             res.on('end', function () {
-                var resp = JSON.parse(out);
-                if (resp.code == 200) {
-                    resolve(resp.data);
-                } else {
-                    reject(resp);
+                try {
+                    var resp = JSON.parse(out);
+                    console.log('Server responded: ', resp);
+                    if (resp.code == 200) {
+                        resolve(resp.data);
+                    } else {
+                        reject(resp);
+                    }
+                } catch (e) {
+                    console.log('Something bad happened! JSON Parse failed?', e);
+                    console.log('Server reply was ', out);
                 }
             });
         });
 
         req.on('error', function (e) {
+            console.log('Server errored: ', e);
             reject(e.message);
         });
 
@@ -78,18 +88,33 @@ module.exports = function () {
         'stage': stages.TOURN_NOT_STARTED,
         'gamesFinished': 0,
         'totalPlayedGames': 0,
-        'coffeebreakStartAt': null,
+        'coffeebreakStartedAt': null,
         'currentSeating': null
     };
 
     var actions = {
+        'RESET_TOURNAMENT': function(state, payload, cb) {
+            cb(null, {
+                'stage': stages.TOURN_NOT_STARTED,
+                'gamesFinished': 0,
+                'totalPlayedGames': 0,
+                'coffeebreakStartedAt': null,
+                'currentSeating': null
+            });
+        },
+
         'START_TOURNAMENT': function (state, payload, cb) {
             if (state.stage != stages.TOURN_NOT_STARTED) {
                 cb({message: 'Tournament already started'});
                 return;
             }
 
-            makeSortition(function (sortition) {
+            makeSortition(function (e, sortition) {
+                if (e) {
+                    cb(e);
+                    return;
+                }
+
                 cb(null, Object.assign(state, {
                     stage: stages.SORTITION_READY,
                     currentSeating: sortition
@@ -103,58 +128,47 @@ module.exports = function () {
                 return;
             }
 
-            var tables = [];
-            for (var i = 0; i < state.currentSeating.length; i++) {
-                tables.push(startSingleTable(state.currentSeating[i]));
-            }
+            function start(idx) { // serial table start function, delays by 2sec
+                if (idx >= state.currentSeating.length) { // all done
+                    tableStartCb(null, null, {success: true, allTablesStarted: true});
+                    cb(null, Object.assign(state, {
+                        stage: stages.GAMES_STARTED
+                    }));
+                    return;
+                }
 
-            Promise.all(tables).then(function () {
-                tableStartCb(null, null, {success: true, allTablesStarted: true});
-                cb(null, Object.assign(state, {
-                    stage: stages.GAMES_STARTED
-                }));
-            });
+                startSingleTable(state.currentSeating[idx]).then(function() {
+                    console.log('Table #' + idx + ' started successfully');
+                    setTimeout(function() {
+                        start(idx+1);
+                    }, 2000);
+                }).catch(function(e) {
+                    console.log('Starting table failed: ', e);
+                });
+            }
 
             cb(null, Object.assign(state, {
                 stage: stages.SEATING_STARTED
             }));
+
+            start(0);
         },
 
         'GAME_ENDED': function (state, payload, cb) {
-            if (state.stage != stages.GAMES_STARTED) {
+            if (state.stage != stages.GAMES_STARTED || state.stage != stages.FINAL_GAME_STARTED) {
                 cb({message: 'Can\'t add finished game while no or not all games are started'});
                 return;
             }
 
             registerGame(payload.link, function (e, result) {
                 if (e) {
-                    cb({message: 'Couldn\'t add game :( Wrong link? Try again.'});
+                    cb(e);
                     return;
                 }
 
                 if (payload.onSuccess) payload.onSuccess(result);
 
-                var finishedCount = state.gamesFinished + 1;
-                if (finishedCount >= state.currentSeating.length) { // all games finished
-                    var itr = setInterval(coffeebreakTimer(state, cb), 5000);
-
-                    for (var i in reservedBots) {
-                        reservedBots[i] = false; // all bots are free
-                    }
-
-                    cb(null, Object.assign(state, {
-                        totalPlayedGames: state.totalPlayedGames + 1,
-                        stage: stages.COFFEEBREAK,
-                        breakTime: (state.totalPlayedGames == 4 ? coffebreakIntervals.BIG : coffebreakIntervals.SMALL),
-                        coffeebreakStartedAt: (new Date()).getTime(),
-                        coffeebreakTimer: itr,
-                        gamesFinished: 0
-                    }));
-                } else {
-                    cb(null, Object.assign(state, {
-                        gamesFinished: finishedCount
-                    }));
-                }
+                finishGame(state, cb);
             });
         },
 
@@ -173,26 +187,6 @@ module.exports = function () {
             cb(null, Object.assign(state, {
                 stage: stages.FINAL_SEATING_STARTED
             }));
-        },
-
-        'FINAL_GAME_ENDED': function (state, payload, cb) {
-            if (state.stage != stages.FINAL_GAME_STARTED) {
-                cb({message: 'Can\'t add finished final game while it is not started'});
-                return;
-            }
-
-            registerGame(payload.link, function (e, result) {
-                if (e) {
-                    cb({message: 'Couldn\'t add game :( Wrong link? Try again.'});
-                    return;
-                }
-
-                if (payload.onSuccess) payload.onSuccess(result);
-
-                cb(null, Object.assign(state, {
-                    stage: stages.TOURN_FINISHED
-                }));
-            });
         },
 
         'PAUSE_TOURNAMENT': function (state, payload, cb) {
@@ -234,7 +228,6 @@ module.exports = function () {
 
                 cb(null, Object.assign(state, {
                     oldStage: null,
-                    totalPlayedGames: state.totalPlayedGames + 1,
                     stage: stages.COFFEEBREAK,
                     coffeebreakStartedAt: (new Date()).getTime(),
                     coffeebreakTimer: itr,
@@ -244,13 +237,47 @@ module.exports = function () {
         }
     };
 
+    function finishGame(state, cb) {
+        if (state.totalPlayedGames >= TOURN_GAMES_COUNT - 1) {
+            cb(null, Object.assign(state, {
+                totalPlayedGames: state.totalPlayedGames + 1,
+                stage: stages.TOURN_FINISHED,
+                gamesFinished: 0
+            }));
+            return;
+        }
+
+        var finishedCount = state.gamesFinished + 1;
+        console.log('Finished game ', finishedCount, ' of ', state.currentSeating.length);
+        if (finishedCount >= state.currentSeating.length) { // all games finished
+            var itr = setInterval(coffeebreakTimer(state, cb), 5000);
+
+            for (var i in reservedBots) {
+                reservedBots[i] = false; // all bots are free
+            }
+
+            cb(null, Object.assign(state, {
+                totalPlayedGames: state.totalPlayedGames + 1,
+                stage: stages.COFFEEBREAK,
+                breakTime: (state.totalPlayedGames + 1 == (TOURN_GAMES_COUNT / 2) ? coffebreakIntervals.BIG : coffebreakIntervals.SMALL),
+                coffeebreakStartedAt: (new Date()).getTime(),
+                coffeebreakTimer: itr,
+                gamesFinished: 0
+            }));
+        } else {
+            cb(null, Object.assign(state, {
+                gamesFinished: finishedCount
+            }));
+        }
+    }
+
     function coffeebreakTimer(state, cb) {
         return function () {
-            var breakTime = (state.totalPlayedGames == 4 ? coffebreakIntervals.BIG : coffebreakIntervals.SMALL);
-            if ((new Date()).getTime() - state.coffeebreakStartAt > breakTime) {
-                if (state.totalPlayedGames < 7) {
-                    makeSortition(function (sortition) {
-                        cb(null, Object.assign(state, {
+            var breakTime = (state.totalPlayedGames == (TOURN_GAMES_COUNT / 2) ? coffebreakIntervals.BIG : coffebreakIntervals.SMALL);
+            if ((new Date()).getTime() - state.coffeebreakStartedAt > breakTime) {
+                if (state.totalPlayedGames < TOURN_GAMES_COUNT - 1) {
+                    makeSortition(function (e, sortition) {
+                        cb(e, Object.assign(state, {
                             stage: stages.SORTITION_READY,
                             currentSeating: sortition
                         }));
@@ -278,10 +305,10 @@ module.exports = function () {
         }
 
         var data = {
-            player1: fixedEncodeURIComponent(playersList[0]),
-            player2: fixedEncodeURIComponent(playersList[1]),
-            player3: fixedEncodeURIComponent(playersList[2]),
-            player4: fixedEncodeURIComponent(playersList[3]),
+            player1: fixedEncodeURIComponent(Base64.decode(playersList[0]['username'])),
+            player2: fixedEncodeURIComponent(Base64.decode(playersList[1]['username'])),
+            player3: fixedEncodeURIComponent(Base64.decode(playersList[2]['username'])),
+            player4: fixedEncodeURIComponent(Base64.decode(playersList[3]['username'])),
             lobby_private_key: PRIVATE_KEY
         };
 
@@ -297,36 +324,44 @@ module.exports = function () {
                     })
                     .catch(function (resp) {
                         if (attemptsCount < maxAttempts) { // legal attempts for slowpoke users
+                            attemptsCount++;
                             tableStartCb(resp.absentUsers, playersList, {success: false, reattempting: true});
                             setTimeout(attempt, 30000); // re-attempt in 30 secs
                         } else { // wooh, something went really wrong! trying to recover
                             if (resp.absentUsers.length == 4) { // not likely to happen
-                                tableStartCb(resp.absentUsers, null, {success: false, reattempting: false});
+                                tableStartCb(resp.absentUsers, null, {tableDropped: true});
                                 resolve();
+                                setTimeout(function() {
+                                    finishGame(state, function(e, st) {stateChangeCb(st);});
+                                }, 2000); // on resolve it becomes games_started, but we need to wait some time. Ugly, though.
                                 return;
                             }
                             // Заменяем опоздунов на ботов!
                             // Обязательно предупредить людей, чтобы они не уходили из лобби во избежание такой ситуации.
                             var liveUsers = playersList.filter(function(n) {
-                                return resp.absentUsers.indexOf(n) == -1;
+                                return resp.absentUsers.indexOf(Base64.decode(n.username)) == -1;
                             });
                             for (var i in reservedBots) {
                                 if (reservedBots[i] == false && liveUsers.length < 4) {
-                                    liveUsers.push(reservedBots[i]);
+                                    liveUsers.push({username: Base64.encode(i)});
                                     reservedBots[i] = true;
                                 }
                             }
 
                             if (liveUsers.length == 4) { // fine, lets play with bots
+                                tableStartCb(resp.absentUsers, null, {success: false, reattempting: false});
+                                console.log('Playing with bots', liveUsers);
+                                playersList = liveUsers;
                                 data = {
-                                    player1: fixedEncodeURIComponent(liveUsers[0]),
-                                    player2: fixedEncodeURIComponent(liveUsers[1]),
-                                    player3: fixedEncodeURIComponent(liveUsers[2]),
-                                    player4: fixedEncodeURIComponent(liveUsers[3]),
+                                    player1: fixedEncodeURIComponent(Base64.decode(liveUsers[0]['username'])),
+                                    player2: fixedEncodeURIComponent(Base64.decode(liveUsers[1]['username'])),
+                                    player3: fixedEncodeURIComponent(Base64.decode(liveUsers[2]['username'])),
+                                    player4: fixedEncodeURIComponent(Base64.decode(liveUsers[3]['username'])),
                                     lobby_private_key: PRIVATE_KEY
                                 };
                                 setTimeout(attempt, 1000);
                             } else { // boooo :((( no bots left - DAFUQ!!
+                                console.log('Bots pool exhausted D:');
                                 resolve();
                                 setTimeout(function() {
                                     dispatch({type: 'PAUSE_TOURNAMENT'}, function() {}); // pause to make some manual decisions
@@ -375,7 +410,7 @@ module.exports = function () {
         makePost(url, {}).then(function (usernames) {
             fisherYates(usernames);
             cb(usernames.map(function (el) {
-                return {'username': el};
+                return {'username': Base64.encode(el)};
             }));
         });
     }
@@ -384,16 +419,20 @@ module.exports = function () {
         var url = '/api/1.0/registerReplay/';
         makePost(url, {replay_link: link})
             .then(function (data) {
+                console.log('registerGame success!');
                 cb(null, data);
             })
             .catch(function (e) {
+                console.log('registerGame error: ', e);
                 cb(e);
             });
     }
 
 
     function dispatch(action, cb) {
+        console.log('Dispatching action to fsm: ', action);
         actions[action.type](state, action.payload, function (e, result) {
+            console.log('Reply came for action: ', action, e);
             if (e) {
                 return cb(e);
             }
